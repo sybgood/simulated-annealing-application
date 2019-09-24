@@ -16,75 +16,79 @@ public class Position {
         this.longitude = longitude;
     }
     public Position nextPosition(Direction direction) {
+        double n_latitude = latitude;
+        double n_longitude = longitude;
         switch (direction) {
             case S:
-                latitude = latitude - r;
+                n_latitude = latitude - r;
                 break;
+                
             case N:
-                latitude = latitude + r;
+                n_latitude = latitude + 0.0003;
                 break;
+                
             case W:
-                longitude = longitude - r;
+                n_longitude = longitude - r;
                 break;
+                
             case E:
-                longitude = longitude + r;
+                n_longitude = longitude + r;
                 break;
             case NNE:
-                longitude = longitude + w2;
-                latitude = latitude + h2;
+                n_longitude = longitude + w2;
+                n_latitude = latitude + h2;
                 break;
             case NE:
-                longitude = longitude +w3;
-                latitude = latitude + h3;
+                n_longitude = longitude +w3;
+                n_latitude = latitude + h3;
                 break;
             case ENE:
-                longitude = longitude + w4;
-                latitude = latitude + h4;
+                n_longitude = longitude + w4;
+                n_latitude = latitude + h4;
                 break;          
             case ESE:
-                longitude = longitude + w4;
-                latitude = latitude - h4;
+                n_longitude = longitude + w4;
+                n_latitude = latitude - h4;
                 break;
             case SE:
-                longitude = longitude + w3;
-                latitude = latitude - h3;
+                n_longitude = longitude + w3;
+                n_latitude = latitude - h3;
                 break;
             case SSE:
-                longitude = longitude + w2;
-                latitude = latitude - h2;
+                n_longitude = longitude + w2;
+                n_latitude = latitude - h2;
                 break;
             case SSW:
-                longitude = longitude - w2;
-                latitude = latitude - h2;
+                n_longitude = longitude - w2;
+                n_latitude = latitude - h2;
                 break;
             case SW:
-                longitude = longitude - w3;
-                latitude = latitude - h3;
+                n_longitude = longitude - w3;
+                n_latitude = latitude - h3;
                 break;
             case WSW:
-                longitude = longitude - w4;
-                latitude =latitude - h4;
+                n_longitude = longitude - w4;
+                n_latitude =latitude - h4;
                 break;
             case WNW:
-                longitude = longitude - w4;
-                latitude = latitude + h4;
+                n_longitude = longitude - w4;
+                n_latitude = latitude + h4;
                 break;
             case NW:
-                longitude = longitude - w3;
-                latitude = latitude + h3;
+                n_longitude = longitude - w3;
+                n_latitude = latitude + h3;
                 break;
             case NNW:
-                longitude = longitude - w2;
-                latitude = latitude + h2;
+                n_longitude = longitude - w2;
+                n_latitude = latitude + h2;
                 break;
                            }
-        Position p = new Position(latitude,longitude);
-        return p;
+        return new Position(n_latitude,n_longitude);
         }
     public boolean inPlayArea() { 
         boolean x=true, y = true;
-        if (this.latitude<55.942617||this.latitude>55.946233) x = false;
-        if (this.longitude<-3.192473||this.longitude>-3.184319) y = false;
+        if (this.latitude<=55.942617||this.latitude>=55.946233) x = false;
+        if (this.longitude<=-3.192473||this.longitude>=-3.184319) y = false;
         return x&&y;
     }
 }
