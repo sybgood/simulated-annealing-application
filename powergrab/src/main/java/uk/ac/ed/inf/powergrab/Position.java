@@ -4,91 +4,52 @@ public class Position {
     public double latitude;
     public double longitude;
     private double r = 0.0003;//movement speed
-    private double w2 = r*Math.cos(67.5*Math.PI/180);
-    private double w3 = r*Math.cos(45*Math.PI/180);
-    private double w4 = r*Math.cos(22.5*Math.PI/180);
-    private double h2 = r*Math.sin(67.5*Math.PI/180);
-    private double h3 = r*Math.sin(45*Math.PI/180);
-    private double h4 = r*Math.sin(22.5*Math.PI/180);
 
     public Position(double latitude, double longitude) { 
         this.latitude  = latitude;
         this.longitude = longitude;
     }
     public Position nextPosition(Direction direction) {
-        double n_latitude = latitude;
-        double n_longitude = longitude;
         switch (direction) {
             case S:
-                n_latitude = latitude - r;
-                break;
-                
+                return new Position (latitude - r, longitude);
             case N:
-                n_latitude = latitude + 0.0003;
-                break;
-                
+                return new Position (latitude + r, longitude);
             case W:
-                n_longitude = longitude - r;
-                break;
-                
+                return new Position(latitude,longitude-r);            
             case E:
-                n_longitude = longitude + r;
-                break;
+                return new Position(latitude,longitude+r);
             case NNE:
-                n_longitude = longitude + w2;
-                n_latitude = latitude + h2;
-                break;
+                return new Position(latitude+r*Math.sin(67.5*Math.PI/180),longitude +r * Math.cos(67.5*Math.PI/180));
             case NE:
-                n_longitude = longitude +w3;
-                n_latitude = latitude + h3;
-                break;
+                return new Position(latitude+r*Math.cos(45*Math.PI/180),longitude + r*Math.sin(45*Math.PI/180));
             case ENE:
-                n_longitude = longitude + w4;
-                n_latitude = latitude + h4;
-                break;          
+                return new Position(latitude + r*Math.sin(22.5*Math.PI/180),longitude + r*Math.cos(22.5*Math.PI/180));          
             case ESE:
-                n_longitude = longitude + w4;
-                n_latitude = latitude - h4;
-                break;
+                return new Position(latitude - r*Math.sin(22.5*Math.PI/180),longitude + r*Math.cos(22.5*Math.PI/180));
             case SE:
-                n_longitude = longitude + w3;
-                n_latitude = latitude - h3;
-                break;
+                return new Position(latitude - r*Math.sin(45*Math.PI/180),longitude + r*Math.cos(45*Math.PI/180));
             case SSE:
-                n_longitude = longitude + w2;
-                n_latitude = latitude - h2;
-                break;
+                return new Position(latitude - r*Math.sin(67.5*Math.PI/180),longitude + r * Math.cos(67.5*Math.PI/180));
             case SSW:
-                n_longitude = longitude - w2;
-                n_latitude = latitude - h2;
-                break;
+                return new Position(latitude - r*Math.sin(67.5*Math.PI/180),longitude - r * Math.cos(67.5*Math.PI/180));
             case SW:
-                n_longitude = longitude - w3;
-                n_latitude = latitude - h3;
-                break;
+                return new Position(latitude - r*Math.sin(45*Math.PI/180),longitude - r*Math.cos(45*Math.PI/180));
             case WSW:
-                n_longitude = longitude - w4;
-                n_latitude =latitude - h4;
-                break;
+                return new Position(latitude - r*Math.sin(22.5*Math.PI/180),longitude - r*Math.cos(22.5*Math.PI/180));
             case WNW:
-                n_longitude = longitude - w4;
-                n_latitude = latitude + h4;
-                break;
+                return new Position(latitude + r*Math.sin(22.5*Math.PI/180),longitude - r*Math.cos(22.5*Math.PI/180));
             case NW:
-                n_longitude = longitude - w3;
-                n_latitude = latitude + h3;
-                break;
+                return new Position(latitude + r*Math.sin(45*Math.PI/180),longitude - r*Math.cos(45*Math.PI/180));
             case NNW:
-                n_longitude = longitude - w2;
-                n_latitude = latitude + h2;
-                break;
-                           }
-        return new Position(n_latitude,n_longitude);
+                return new Position(latitude+r*Math.sin(67.5*Math.PI/180),longitude - r * Math.cos(67.5*Math.PI/180));
+            default: return null;
+        }
+            
         }
     public boolean inPlayArea() { 
-        boolean x=true, y = true;
-        if (this.latitude<=55.942617||this.latitude>=55.946233) x = false;
-        if (this.longitude<=-3.192473||this.longitude>=-3.184319) y = false;
-        return x&&y;
+        if (this.latitude<=55.942617||this.latitude>=55.946233) return false;;
+        if (this.longitude<=-3.192473||this.longitude>=-3.184319) return false;
+        return true;
     }
 }
