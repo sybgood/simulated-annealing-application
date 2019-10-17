@@ -23,9 +23,20 @@ public class App
         String difficulty = args[6];
         
         Map map = new Map(year,month,day);
-
+       // for (Position p :map.getCoorList()) {
+       //     System.out.print(p.latitude);
+       // }
         Statelessdrone d = new Statelessdrone(latitude,longitude,RNGseed,map);
-        d.statelessMove();
+       // d.statelessMove();
+        try {
+            FileOutputStream bos = new FileOutputStream("output.txt");
+            System.setOut(new PrintStream(bos));
+            d.statelessMove();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
 
 }

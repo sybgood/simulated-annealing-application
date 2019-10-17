@@ -3,7 +3,7 @@ package uk.ac.ed.inf.powergrab;
 public class Position { 
     public double latitude;
     public double longitude;
-    private double r = 0.0003;//movement speed
+    private static double r = 0.0003;//movement speed
 
     public Position(double latitude, double longitude) { 
         this.latitude  = latitude;

@@ -14,6 +14,7 @@ public class Statelessdrone extends drone {
             for (Direction d:h.keySet()) {
                 String Id = h.get(d);
                 if(map.IDpower.get(Id)>0) {
+                    nearStation = Id;
                     return d;
                 }
             }
@@ -27,8 +28,19 @@ public class Statelessdrone extends drone {
         while(steps>0) {
             if(power<=0) break;
             Direction d = statelessSearch();
-            move(d);
+            Double prev_latitude =curr.latitude;
+            Double prev_longitude = curr.longitude;
+            Boolean isSuccess = super.move(d);
+            if(!nearStation.isEmpty())
+            {
+                super.meetChargeStation(nearStation);
+                nearStation = "";
+            }
+            if(isSuccess) {
+                System.out.print(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
+                        +" "+coin+" "+power+"\n");
+            }
+                       
         }
-        System.out.print("game over");
     }
 }

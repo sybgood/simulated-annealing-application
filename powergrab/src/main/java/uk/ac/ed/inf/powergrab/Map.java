@@ -12,18 +12,37 @@ import com.mapbox.geojson.*;
 import java.util.ArrayList;
 public class Map {
     
-    public HashMap<List<Double>,String> CoordinateId = new HashMap<List<Double>,String>();
+    public HashMap<Position,String> CoordinateId = new HashMap<Position,String>();
     public HashMap<String,Double> IDcoins = new HashMap<String,Double>();
     public HashMap<String,Double> IDpower = new HashMap<String,Double>();
     private ArrayList<String> ID = new ArrayList<String>();
-    private ArrayList<ArrayList<Double>> CoordinatedList = new ArrayList<ArrayList<Double>>();
+    private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
 
     public ArrayList<String> getIDlist() {
     return ID;
     }
 
-    public ArrayList<ArrayList<Double>> getCoorList(){
+    public ArrayList<Position> getCoorList(){
         return this.CoordinatedList;
+    }
+    private void fetch_coor(Geometry g,String id) {
+        Point p = (Point)(g);
+        Position coor = new Position(p.latitude(),p.longitude());
+        CoordinateId.put(coor,id);
+        CoordinatedList.add(coor);
+    }
+    
+    private String CoinPower(Feature f) {
+        JsonElement id = f.getProperty("id");
+        String ids = id.getAsString(); 
+        ID.add(ids);
+        JsonElement coin = f.getProperty("coins");
+        Double coins = (double) coin.getAsFloat();
+        JsonElement power = f.getProperty("power");
+        Double powers = (double) power.getAsFloat();
+        IDcoins.put(ids, coins);
+        IDpower.put(ids, powers);
+        return ids;
     }
     
     public Map(String year,String month,String day) {
@@ -42,23 +61,10 @@ public class Map {
                 List<Feature> Featurelist = fc.features();
                 for (Feature f : Featurelist) {
 //-------------- store map information--------------------------------------------
-                    JsonElement id = f.getProperty("id");
-                    String ids = id.getAsString(); 
-                    ID.add(ids);
-                    JsonElement coin = f.getProperty("coins");
-                    Double coins = (double) coin.getAsFloat();
-                    JsonElement power = f.getProperty("power");
-                    Double powers = (double) power.getAsFloat();
-                    IDcoins.put(ids, coins);
-                    IDpower.put(ids, powers);
+                    String ids = CoinPower(f);
 //-----------------Fetch coordinates for current feature---------------------------------                
                     Geometry g = f.geometry();
-                        Point p = (Point)(g);
-                        ArrayList<Double> l = new ArrayList<Double>();
-                        l.add(p.longitude());
-                        l.add(p.latitude());
-                        CoordinateId.put(l,ids);
-                        CoordinatedList.add(l);
+                    fetch_coor(g,ids); 
                 }
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block

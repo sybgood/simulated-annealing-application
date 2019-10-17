@@ -11,29 +11,29 @@ public abstract class drone {
     protected Position curr;
     protected Map map;
     protected Random rnd;
+    protected String nearStation="";
+
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
-        map = map;
+        this.map = map;
         rnd = new Random(seed);
     }
     
-    public void move(Direction direction) {
+    public Boolean move(Direction direction) {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
             if(next.inPlayArea()) {
                 curr = next;
-                power = power - 1.25;
+                power -= 1.25;
                 steps--;
-            }
-            else {
-                System.out.print("Not in area!");
+                return true;
             }
         }
-        else {
-            System.out.print("Game over");
-        }
+        return false;
     }
-    
+    public Map getMap() {
+        return map;
+    }
     private Boolean canMove() {
         if (power>1.25&&steps>0) return true;
         return false;
@@ -45,11 +45,8 @@ public abstract class drone {
         for (Direction d : Direction.values()) {
             Position nextp = curr.nextPosition(d);
             if(nextp.inPlayArea()) {
-                Double lati = nextp.latitude;
-                Double loni = nextp.longitude;
-                
-                for (ArrayList<Double> coor: map.getCoorList()) {
-                    if(calculateD(lati,loni,coor.get(1),coor.get(0))<=0.00025) {
+                for (Position coor: map.getCoorList()) {
+                    if(isNear(nextp,coor)) {
                         k.put(d,map.CoordinateId.get(coor));
                     }
                 }
@@ -58,8 +55,12 @@ public abstract class drone {
         return k;
     }
     
-    public Double calculateD(Double x1,Double y1,Double x2,Double y2) {
-        return Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2));
+    public Boolean isNear(Position p1, Position p2) {
+        Double x1 = p1.latitude;
+        Double x2 = p2.latitude;
+        Double y1 = p1.longitude;
+        Double y2 = p2.longitude;
+        return (Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2))<=0.00025);
     }
     
     public void meetChargeStation(String ID) {
