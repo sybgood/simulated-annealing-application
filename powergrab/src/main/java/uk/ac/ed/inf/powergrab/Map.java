@@ -16,13 +16,13 @@ public class Map {
     public HashMap<String,Double> IDcoins = new HashMap<String,Double>();
     public HashMap<String,Double> IDpower = new HashMap<String,Double>();
     private ArrayList<String> ID = new ArrayList<String>();
-    private ArrayList<List<Double>> CoordinatedList = new ArrayList<List<Double>>();
+    private ArrayList<ArrayList<Double>> CoordinatedList = new ArrayList<ArrayList<Double>>();
 
-    public ArrayList getIDlist() {
+    public ArrayList<String> getIDlist() {
     return ID;
     }
 
-    public ArrayList<List<Double>> getCoorList(){
+    public ArrayList<ArrayList<Double>> getCoorList(){
         return this.CoordinatedList;
     }
     
@@ -53,12 +53,12 @@ public class Map {
                     IDpower.put(ids, powers);
 //-----------------Fetch coordinates for current feature---------------------------------                
                     Geometry g = f.geometry();
-                    if(g.type()=="Point") {
                         Point p = (Point)(g);
-                        List<Double> l = p.coordinates();
+                        ArrayList<Double> l = new ArrayList<Double>();
+                        l.add(p.longitude());
+                        l.add(p.latitude());
                         CoordinateId.put(l,ids);
                         CoordinatedList.add(l);
-                    }
                 }
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block

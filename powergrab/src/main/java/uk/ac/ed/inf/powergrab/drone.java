@@ -1,4 +1,5 @@
 package uk.ac.ed.inf.powergrab;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -47,7 +48,7 @@ public abstract class drone {
                 Double lati = nextp.latitude;
                 Double loni = nextp.longitude;
                 
-                for (List<Double> coor: map.getCoorList()) {
+                for (ArrayList<Double> coor: map.getCoorList()) {
                     if(calculateD(lati,loni,coor.get(1),coor.get(0))<=0.00025) {
                         k.put(d,map.CoordinateId.get(coor));
                     }
