@@ -1,6 +1,8 @@
 package uk.ac.ed.inf.powergrab;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Random;
+import java.util.List;
 
 public class Statelessdrone extends drone {
 
@@ -10,6 +12,8 @@ public class Statelessdrone extends drone {
     }
     public Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range , then go towards that station, otherwise return a random direction.}
         HashMap<Direction,String> h = super.haveStation(curr);
+        Direction[] directionSet = Direction.values();
+        List<Direction>Directionlist = new ArrayList<Direction>(Arrays.asList(directionSet));
         if(!h.isEmpty()) {   
             for (Direction d:h.keySet()) {
                 String Id = h.get(d);
@@ -17,10 +21,18 @@ public class Statelessdrone extends drone {
                     nearStation = Id;
                     return d;
                 }
+                if(map.IDpower.get(Id)<0) {
+                    Directionlist.remove(d);
+                }
             }
         }
-        Integer number = rnd.nextInt(16);
-        Direction d = Direction.values()[number];
+        if(!Directionlist.isEmpty()) {
+            Integer number = rnd.nextInt(Directionlist.size());
+            Direction d = Directionlist.get(number);
+            return d;
+        }
+        Direction d =  Direction.values()[rnd.nextInt(16)];
+        nearStation = h.get(d);
         return d;
     }
 
@@ -39,8 +51,7 @@ public class Statelessdrone extends drone {
             if(isSuccess) {
                 System.out.print(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
                         +" "+coin+" "+power+"\n");
-            }
-                       
+            }          
         }
     }
 }
