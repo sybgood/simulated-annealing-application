@@ -23,6 +23,7 @@ public abstract class drone {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
             if(next.inPlayArea()) {
+                map.addLineString(curr, next);
                 curr = next;
                 power -= 1.25;
                 steps--;
@@ -31,6 +32,7 @@ public abstract class drone {
         }
         return false;
     }
+    
     public Map getMap() {
         return map;
     }
@@ -55,7 +57,7 @@ public abstract class drone {
         return k;
     }
     
-    public Boolean isNear(Position p1, Position p2) {
+    public static Boolean isNear(Position p1, Position p2) {
         Double x1 = p1.latitude;
         Double x2 = p2.latitude;
         Double y1 = p1.longitude;
