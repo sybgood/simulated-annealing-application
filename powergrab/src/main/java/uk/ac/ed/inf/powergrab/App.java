@@ -30,19 +30,31 @@ public class App
        // d.statelessMove();
         try {
             FileOutputStream bos = new FileOutputStream("output.txt");
-            System.setOut(new PrintStream(bos));
-            d.statelessMove();
+            BufferedOutputStream buff = new BufferedOutputStream(bos);
+            String trace = d.statelessMove();
+            buff.write(trace.getBytes());
+            buff.flush();
+            buff.close();
             map = d.getMap();
             String json = map.outputJson();
             FileOutputStream bos2 = new FileOutputStream("2018.geojson");
-            System.setOut(new PrintStream(bos2));
-            System.out.print(json);
+            BufferedOutputStream buff2 =new  BufferedOutputStream(bos2);
+            buff2.write(json.getBytes());
+            buff2.flush();
         } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         
+    }
+
+    private static BufferedOutputStream BufferedOutputStream(FileOutputStream bos2) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
