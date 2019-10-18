@@ -32,10 +32,16 @@ public class App
             FileOutputStream bos = new FileOutputStream("output.txt");
             System.setOut(new PrintStream(bos));
             d.statelessMove();
+            map = d.getMap();
+            String json = map.outputJson();
+            FileOutputStream bos2 = new FileOutputStream("2018.geojson");
+            System.setOut(new PrintStream(bos2));
+            System.out.print(json);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         
     }
 
