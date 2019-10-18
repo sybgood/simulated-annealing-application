@@ -3,7 +3,6 @@ package uk.ac.ed.inf.powergrab;
 import java.io.*;
 import java.net.*;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
@@ -17,7 +16,8 @@ public class Map {
     public HashMap<String,Double> IDpower = new HashMap<String,Double>();
     private ArrayList<String> ID = new ArrayList<String>();
     private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
-
+    private ArrayList<Feature> FeatureList;
+    
     public ArrayList<String> getIDlist() {
     return ID;
     }
@@ -25,6 +25,7 @@ public class Map {
     public ArrayList<Position> getCoorList(){
         return this.CoordinatedList;
     }
+    
     private void fetch_coor(Geometry g,String id) {
         Point p = (Point)(g);
         Position coor = new Position(p.latitude(),p.longitude());
@@ -32,6 +33,21 @@ public class Map {
         CoordinatedList.add(coor);
     }
     
+    public void addLineString(Position pp, Position np) {
+        Point p1 = Point.fromLngLat(pp.longitude, pp.latitude);
+        Point p2 = Point.fromLngLat(np.longitude, np.latitude);
+        List<Point> plist = new ArrayList<Point>();
+        plist.add(p1);
+        plist.add(p2);
+        LineString l = LineString.fromLngLats(plist);
+        Feature f = Feature.fromGeometry(l);
+        FeatureList.add(f);
+    }
+    
+    public String outputJson() {
+        FeatureCollection fc = FeatureCollection.fromFeatures(FeatureList);
+        return fc.toJson();
+    }
     private String CoinPower(Feature f) {
         JsonElement id = f.getProperty("id");
         String ids = id.getAsString(); 
@@ -48,6 +64,7 @@ public class Map {
     public Map(String year,String month,String day) {
             String mapString = "http://homepages.inf.ed.ac.uk/stg/powergrab/"+year+"/"+month+"/"+day+"/"+"powergrabmap.geojson";
             try {
+                //HTTP URL connection   
                 URL mapURL = new URL(mapString);
                 URLConnection conn = mapURL.openConnection();
                 conn.setReadTimeout(10000);
@@ -58,8 +75,8 @@ public class Map {
                 // Read map.
                 String result = new BufferedReader(new InputStreamReader(mapSource)).lines().collect(Collectors.joining("\n"));
                 FeatureCollection fc = FeatureCollection.fromJson(result);
-                List<Feature> Featurelist = fc.features();
-                for (Feature f : Featurelist) {
+                FeatureList = (ArrayList<Feature>) fc.features();
+                for (Feature f : FeatureList) {
 //-------------- store map information--------------------------------------------
                     String ids = CoinPower(f);
 //-----------------Fetch coordinates for current feature---------------------------------                
