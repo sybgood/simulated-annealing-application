@@ -43,7 +43,7 @@ public abstract class drone {
     
     public HashMap<Direction,String> haveStation(Position p) { 
         HashMap<Direction,String> k = new HashMap<Direction,String>();
-        
+        // wait for map.getCoorList().sort()
         for (Direction d : Direction.values()) {
             Position nextp = curr.nextPosition(d);
             if(nextp.inPlayArea()) {
