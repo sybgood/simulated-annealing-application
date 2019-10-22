@@ -14,7 +14,6 @@ public abstract class drone {
     protected Map map;
     protected final Random rnd;
     protected String nearStation="";
-
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
         this.map = map;
@@ -25,7 +24,7 @@ public abstract class drone {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
             if(next.inPlayArea()) {
-                map.addLineString(curr, next);
+                map.addTrace(next);
                 curr = next;
                 power -= 1.25;
                 steps--;
@@ -47,28 +46,23 @@ public abstract class drone {
         HashMap<Direction,String> k = new HashMap<Direction,String>();
         // wait for map.getCoorList().sort()
         int i;
+        Position coor;
+        Position nextp;
         for (Direction d : Direction.values()) {
             i = 0;
-            Position coor;
-            Position nextp = curr.nextPosition(d);
+            nextp = curr.nextPosition(d);
             ArrayList<Position> CoorList = map.getCoorList();
             Collections.sort(CoorList,new DistanceComp(nextp));
             while(true) {
                 coor = CoorList.get(i);
-                if(isNear(nextp,coor)) k.put(d,map.CoordinateId.get(coor));
+                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,map.CoordinateId.get(coor));
                 else break;
                 i++;
             }
-//            if(nextp.inPlayArea()) {
-//                for (Position coor: map.getCoorList()) {
-//                    if(isNear(nextp,coor)) {
-//                        k.put(d,map.CoordinateId.get(coor));
-//                    }
-//                }
-//            }
         }
         return k;
     }
+
     public static Double CalDistance(Position p1, Position p2) {
         Double x1 = p1.latitude;
         Double x2 = p2.latitude;
@@ -114,7 +108,7 @@ public abstract class drone {
         }
     }
     class DistanceComp implements Comparator<Position>{
-        private final Position TargetP;
+        private Position TargetP;
         public DistanceComp(Position p) {
             TargetP = p;
         }

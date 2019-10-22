@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 public class Statelessdrone extends drone {
 
     public Statelessdrone(Double latitude, Double longitude,int seed, Map map) {
@@ -36,7 +35,9 @@ public class Statelessdrone extends drone {
         return d;
     }
 
-    public void statelessMove() {
+    public String statelessMove() {
+        StringBuilder s = new StringBuilder();
+        map.addTrace(curr);
         while(steps>0) {
             if(power<=0) break;
             Direction d = statelessSearch();
@@ -49,9 +50,11 @@ public class Statelessdrone extends drone {
                 nearStation = "";
             }
             if(isSuccess) {
-                System.out.print(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
+                s.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
                         +" "+coin+" "+power+"\n");
+                //System.out.print(steps+"\n");
             }          
         }
+        return s.toString();
     }
 }

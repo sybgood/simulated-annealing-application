@@ -27,8 +27,9 @@ public class App
        //     System.out.print(p.latitude);
        // }
         Statelessdrone d = new Statelessdrone(latitude,longitude,RNGseed,map);
-       // d.statelessMove();
+        d.statelessMove();
         try {
+            long ab =System.currentTimeMillis();
             FileOutputStream bos = new FileOutputStream("output.txt");
             BufferedOutputStream buff = new BufferedOutputStream(bos);
             String trace = d.statelessMove();
@@ -38,23 +39,24 @@ public class App
             map = d.getMap();
             String json = map.outputJson();
             FileOutputStream bos2 = new FileOutputStream("2018.geojson");
-            BufferedOutputStream buff2 =new  BufferedOutputStream(bos2);
-            buff2.write(json.getBytes());
-            buff2.flush();
+            buff =new BufferedOutputStream(bos2);
+            buff.write(json.getBytes());
+            buff.flush();
+            long aa = System.currentTimeMillis();
+            System.out.print(aa-ab);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+            e.printStackTrace();}
+    }
         
-    }
+//        Position p1 = new Position(55.943372541675856,-3.185032961811619);
+//        Position p2 = new Position(55.9435,-3.1850);
+//        Position p3 = new Position(55.9436,-3.1847);
+//        Double d1= drone.CalDistance(p1, p2);
+//        Double d2 = drone.CalDistance(p1, p3);
 
-    private static BufferedOutputStream BufferedOutputStream(FileOutputStream bos2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
 }

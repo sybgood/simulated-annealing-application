@@ -16,7 +16,9 @@ public class Map {
     public HashMap<String,Double> IDpower = new HashMap<String,Double>();
     private ArrayList<String> ID = new ArrayList<String>();
     private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
-    private ArrayList<Feature> FeatureList;
+    private List<Point> trace = new ArrayList<Point>();
+    private String result;
+    
     
     public ArrayList<String> getIDlist() {
     return ID;
@@ -33,19 +35,19 @@ public class Map {
         CoordinatedList.add(coor);
     }
     
-    public void addLineString(Position pp, Position np) {
-        Point p1 = Point.fromLngLat(pp.longitude, pp.latitude);
-        Point p2 = Point.fromLngLat(np.longitude, np.latitude);
-        List<Point> plist = new ArrayList<Point>();
-        plist.add(p1);
-        plist.add(p2);
-        LineString l = LineString.fromLngLats(plist);
-        Feature f = Feature.fromGeometry(l);
-        FeatureList.add(f);
+
+    public void addTrace(Position pp) {
+        Point p = Point.fromLngLat(pp.longitude, pp.latitude);
+        trace.add(p);
     }
     
     public String outputJson() {
-        FeatureCollection fc = FeatureCollection.fromFeatures(FeatureList);
+        LineString l = LineString.fromLngLats(trace);
+        Feature f = Feature.fromGeometry(l);
+        FeatureCollection fc = FeatureCollection.fromJson(result);
+        ArrayList<Feature> fl = (ArrayList<Feature>) fc.features();
+        fl.add(f);
+        fc = FeatureCollection.fromFeatures(fl);
         return fc.toJson();
     }
     private String CoinPower(Feature f) {
@@ -73,10 +75,9 @@ public class Map {
                 conn.connect();
                 InputStream mapSource = conn.getInputStream();
                 // Read map.
-                String result = new BufferedReader(new InputStreamReader(mapSource)).lines().collect(Collectors.joining("\n"));
+                result = new BufferedReader(new InputStreamReader(mapSource)).lines().collect(Collectors.joining("\n"));
                 FeatureCollection fc = FeatureCollection.fromJson(result);
-                FeatureList = (ArrayList<Feature>) fc.features();
-                for (Feature f : FeatureList) {
+                for (Feature f : fc.features()) {
 //-------------- store map information--------------------------------------------
                     String ids = CoinPower(f);
 //-----------------Fetch coordinates for current feature---------------------------------                
