@@ -11,9 +11,9 @@ import com.mapbox.geojson.*;
 import java.util.ArrayList;
 public class Map {
     
-    public HashMap<Position,String> CoordinateId = new HashMap<Position,String>();
-    public HashMap<String,Double> IDcoins = new HashMap<String,Double>();
-    public HashMap<String,Double> IDpower = new HashMap<String,Double>();
+    protected HashMap<Position,String> CoordinateId = new HashMap<Position,String>();
+    protected HashMap<String,Double> IDcoins = new HashMap<String,Double>();
+    protected HashMap<String,Double> IDpower = new HashMap<String,Double>();
     private ArrayList<String> ID = new ArrayList<String>();
     private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
     private List<Point> trace = new ArrayList<Point>();
