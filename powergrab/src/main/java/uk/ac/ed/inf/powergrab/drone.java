@@ -1,6 +1,5 @@
 package uk.ac.ed.inf.powergrab;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ public abstract class drone {
     protected Map map;
     protected final Random rnd;
     protected String nearStation="";
+    
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
         this.map = map;
@@ -71,7 +71,7 @@ public abstract class drone {
         return (Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2)));
     }
     
-    public  Boolean isNear(Position p1, Position p2) {
+    public static Boolean isNear(Position p1, Position p2) {
         return (CalDistance(p1,p2)<=0.00025);
     }
     
@@ -107,20 +107,5 @@ public abstract class drone {
             map.IDpower.put(ID,Station_power);
         }
     }
-    class DistanceComp implements Comparator<Position>{
-        private Position TargetP;
-        public DistanceComp(Position p) {
-            TargetP = p;
-        }
-        @Override
-        public int compare(Position p1, Position p2) {
-            Double a = drone.CalDistance(p1,TargetP);
-            Double b = drone.CalDistance(p2, TargetP);
-            return (a>b) ? 1 : -1 ;
-        }
 
-        
-
-        
-    }
 }
