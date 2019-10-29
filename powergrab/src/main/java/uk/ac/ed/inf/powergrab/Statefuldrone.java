@@ -114,8 +114,8 @@ public class Statefuldrone extends drone {
         HashMap<Direction,String> DStation;
         Boolean b;
         ArrayList<Position> CoorList = map.getCoorList();
-        Collections.sort(CoorList,new DistanceComp(curr));
-        while(p!=CoorList.get(0)) {
+        
+        while(p!=CoorList.get(0)||!isNear(curr,p)) {
             Direction d = targetDirection(curr,p);
             DStation = haveStation(curr,d);
             Double prev_latitude =curr.latitude;
@@ -123,12 +123,13 @@ public class Statefuldrone extends drone {
             
             if(DStation.isEmpty()) {
                 b = move(d);
-                if(!b) {
+                if(!b&&!canMove()) {
                  //   System.out.print(b);
                     return b;
                 }
-                str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
+                else{str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
                         +" "+coin+" "+power+"\n");
+                }
             }
             else {
                 int i;
@@ -138,9 +139,10 @@ public class Statefuldrone extends drone {
                     if(!DStation.containsKey(dd)) {
                         b = move(dd);
                         if(!b && !canMove()) return b;
-                        else{
+                        if(b){
                             str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
                                 +" "+coin+" "+power+"\n");
+                            break;
                         }
                     }
                     else {
@@ -148,7 +150,7 @@ public class Statefuldrone extends drone {
                             b = move(dd);
                             if(!b) {
                                 if(!canMove())return b;
-                                break;
+                                continue;
                             }
                             super.meetChargeStation(DStation.get(dd));
                             str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
@@ -159,6 +161,7 @@ public class Statefuldrone extends drone {
                 }
                 if(i==nDset.length) return false;
             }
+            Collections.sort(CoorList,new DistanceComp(curr));
         }
         super.meetChargeStation(map.CoordinateId.get(p));
         return true;
