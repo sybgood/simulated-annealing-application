@@ -30,7 +30,13 @@ public class Statefuldrone extends drone {
         getTargetPath();
         Boolean b;
         int i;
+        Position np;
         ArrayList<Integer> remain = new ArrayList<Integer>();
+            np = target.get(0);
+            if(isNear(curr,np)) {
+                target.remove(0);
+                target.add(1,np);
+            }
         for(i=0;i<target.size();i++) {
             b = moveTo(target.get(i));
             if(!b) {

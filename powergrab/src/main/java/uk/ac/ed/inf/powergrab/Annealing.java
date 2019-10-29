@@ -124,17 +124,16 @@ public class Annealing {
             t = a * t;
             k++;
         }
-        System.out.println("最佳长度出现代数：");
-        System.out.println(bestT);
-        System.out.println("最佳长度");
-        System.out.println(bestEvaluation);
-        System.out.println("最佳路径：");
-        for (int i = 0; i < NumS; i++) {
-            System.out.print(bestPath[i] + ",");
-            if (i % 10 == 0 && i != 0) {
-                System.out.println();
-            }
-        }
+       
+//        System.out.println("Best path length");
+//        System.out.println(bestEvaluation);
+//        System.out.println("Best path：");
+//        for (int i = 0; i < NumS; i++) {
+//            System.out.print(bestPath[i] + ",");
+//            if (i % 10 == 0 && i != 0) {
+//                System.out.println();
+//            }
+//        }
     }
     private ArrayList<Position> onlyPositive (ArrayList<Position> coorList){
         String id;
