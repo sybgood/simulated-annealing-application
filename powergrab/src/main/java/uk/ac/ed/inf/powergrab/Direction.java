@@ -17,7 +17,9 @@ public enum Direction {
 //public String WNW;
 //public String NW;
 //public String NNW;
-N,W,E,S,NNE,NE,ENE,ESE,SE,SSE,SSW,SW,WSW,WNW,NW,NNW;
-
+N,NNE,NE,ENE,
+E,ESE,SE,SSE,
+S,SSW,SW,WSW,
+W,WNW,NW,NNW;
 }
 

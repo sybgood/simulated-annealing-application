@@ -9,6 +9,7 @@ public class Statelessdrone extends drone {
         super(latitude, longitude, seed, map);
         // TODO Auto-generated constructor stub
     }
+    
     public Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range , then go towards that station, otherwise return a random direction.}
         HashMap<Direction,String> h = super.haveStation(curr);
         Direction[] directionSet = Direction.values();

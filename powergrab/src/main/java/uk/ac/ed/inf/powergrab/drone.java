@@ -20,7 +20,7 @@ public abstract class drone {
         rnd = new Random(seed);
     }
     
-    public Boolean move(Direction direction) {
+    protected Boolean move(Direction direction) {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
             if(next.inPlayArea()) {
@@ -37,12 +37,12 @@ public abstract class drone {
     public Map getMap() {
         return map;
     }
-    private Boolean canMove() {
+    protected Boolean canMove() {
         if (power>1.25&&steps>0) return true;
         return false;
     }
 
-    public HashMap<Direction,String> haveStation(Position p) { 
+    protected HashMap<Direction,String> haveStation(Position p) { 
         HashMap<Direction,String> k = new HashMap<Direction,String>();
         // wait for map.getCoorList().sort()
         int i;
@@ -75,7 +75,7 @@ public abstract class drone {
         return (CalDistance(p1,p2)<=0.00025);
     }
     
-    public void meetChargeStation(String ID) {
+    protected void meetChargeStation(String ID) {
         Double Station_power = map.IDpower.get(ID);
         Double Station_coin = map.IDcoins.get(ID);
         if(Station_power>=0) {

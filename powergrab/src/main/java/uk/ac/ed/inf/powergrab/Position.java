@@ -4,7 +4,7 @@ public class Position {
     public double latitude;
     public double longitude;
     private static final double r = 0.0003;//movement speed
-    private static final double w2 =  r*Math.cos(67.5*Math.PI/180);
+    private static final double w2 = r*Math.cos(67.5*Math.PI/180);
     private static final double h2 = r*Math.sin(67.5*Math.PI/180);
     private static final double w3 = r*Math.cos(45*Math.PI/180);
     private static final double h3 = r*Math.sin(45*Math.PI/180);
@@ -25,9 +25,9 @@ public class Position {
             case E:
                 return new Position(latitude,longitude+r);
             case NNE:
-                return new Position(latitude+h2,longitude +w2);
+                return new Position(latitude + h2,longitude + w2);
             case NE:
-                return new Position(latitude+w3,longitude + h3);
+                return new Position(latitude + w3,longitude + h3);
             case ENE:
                 return new Position(latitude + h4,longitude + w4);          
             case ESE:
@@ -47,7 +47,7 @@ public class Position {
             case NW:
                 return new Position(latitude + h3,longitude - w3);
             case NNW:
-                return new Position(latitude+h2,longitude - w2);
+                return new Position(latitude + h2,longitude - w2);
             default: return null;
         }
             

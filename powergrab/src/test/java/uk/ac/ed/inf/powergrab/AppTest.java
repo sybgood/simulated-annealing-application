@@ -61,6 +61,15 @@ public class AppTest extends TestCase {
 		return approxEq(p0.latitude, p1.latitude) && approxEq(p0.longitude, p1.longitude); 
 	}
 	
+	public void testDirection(){
+	    Boolean f = true;
+	    for (Direction D:Direction.values()) {
+	        Position p1 = p0.nextPosition(D);
+	        Direction a = Statefuldrone.targetDirection(p0, p1);
+	        if(a!=D) f= false;
+	    }
+        assertTrue (f);   
+	}
 	public void testNextPositionNotIdentity() {
 		Position p1 = p0.nextPosition(Direction.N);
 		assertFalse(approxEq(p0, p1));
