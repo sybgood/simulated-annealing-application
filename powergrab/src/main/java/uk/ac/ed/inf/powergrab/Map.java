@@ -41,7 +41,7 @@ public class Map {
         trace.add(p);
     }
     
-    public String outputJson() {
+    public String outputJson() { // Output the geojson contains linestring.
         LineString l = LineString.fromLngLats(trace);
         Feature f = Feature.fromGeometry(l);
         FeatureCollection fc = FeatureCollection.fromJson(result);
@@ -62,7 +62,7 @@ public class Map {
         IDpower.put(ids, powers);
         return ids;
     }
-    
+    // Constructor
     public Map(String year,String month,String day) {
             String mapString = "http://homepages.inf.ed.ac.uk/stg/powergrab/"+year+"/"+month+"/"+day+"/"+"powergrabmap.geojson";
             try {
