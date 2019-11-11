@@ -25,7 +25,7 @@ public class Statefuldrone extends drone {
         target.remove(0);
     }
     // Return the trace record.
-    public String toString() {
+    public String returnTrace() {
         return str.toString(); 
     }
     //Move function, the drone will not stop until it run out of power or it achieves 250 moves.
