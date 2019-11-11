@@ -6,20 +6,21 @@ import java.util.HashMap;
 import java.util.Random;
 
 public abstract class drone {
-    protected Double coin = 0.0;
-    protected Double power = 250.0;
-    protected int steps = 250;
-    protected Position curr;
-    protected Map map;
-    protected final Random rnd;
-    protected String nearStation="";
+    protected Double coin = 0.0; 
+    protected Double power = 250.0; 
+    protected int steps = 250; // States how many steps the drone can move, start at 250.
+    protected Position curr; // Current position
+    protected Map map; // The map it store.
+    protected final Random rnd; // Randome seed.
+    protected String nearStation="";  // Id for the station then the drone will charge.
     
+    // Constructor
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
         this.map = map;
         rnd = new Random(seed);
     }
-    
+    // Move to the given direction, return whether success.
     protected Boolean move(Direction direction) {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
@@ -37,33 +38,17 @@ public abstract class drone {
     public Map getMap() {
         return map;
     }
+    // Check self power and steps.
     protected Boolean canMove() {
         if (power>1.25&&steps>0) return true;
         return false;
     }
+    // Give a certain position, check whether there exist a position in its next move.
+    // Please see the report to get the full details.
+    // Return a hashmap with direction as key, and the Station's Id as values
 
-    protected HashMap<Direction,String> haveStation(Position p) { 
-        HashMap<Direction,String> k = new HashMap<Direction,String>();
-        // wait for map.getCoorList().sort()
-        int i;
-        Position coor;
-        Position nextp;
-        for (Direction d : Direction.values()) {
-            i = 0;
-            nextp = curr.nextPosition(d);
-            ArrayList<Position> CoorList = map.getCoorList();
-            Collections.sort(CoorList,new DistanceComp(nextp));
-            while(true) {
-                coor = CoorList.get(i);
-                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,map.CoordinateId.get(coor));
-                else break;
-                i++;
-            }
-        }
-        return k;
-    }
 
-    public static Double CalDistance(Position p1, Position p2) {
+    public static Double calDistance(Position p1, Position p2) {
         Double x1 = p1.latitude;
         Double x2 = p2.latitude;
         Double y1 = p1.longitude;
@@ -72,7 +57,7 @@ public abstract class drone {
     }
     
     public static Boolean isNear(Position p1, Position p2) {
-        return (CalDistance(p1,p2)<=0.00025);
+        return (calDistance(p1,p2)<=0.00025);
     }
     
     protected void meetChargeStation(String ID) {

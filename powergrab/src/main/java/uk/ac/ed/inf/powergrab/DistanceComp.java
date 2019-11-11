@@ -9,8 +9,8 @@ public class DistanceComp implements Comparator <Position> {
     }
     @Override
     public int compare(Position p1, Position p2) {
-        Double a = drone.CalDistance(p1,TargetP);
-        Double b = drone.CalDistance(p2, TargetP);
+        Double a = drone.calDistance(p1,TargetP);
+        Double b = drone.calDistance(p2, TargetP);
         return (a>b) ? 1 : -1 ;
     }
 }

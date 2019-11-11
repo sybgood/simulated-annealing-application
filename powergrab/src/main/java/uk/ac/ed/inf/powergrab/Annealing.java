@@ -10,17 +10,19 @@ public class Annealing {
     private float a;// Annealing weight factor.
     private float t0;// initial temperature
      
-    private Double[][] distance;
-    private int NumS;
-    private int bestT;
-    private int[] Path;
-    private Double PathEvaluation;
-    private int[] bestPath;
-    private Double bestEvaluation;
-    private int[] tempPath;
-    private Double tempEvaluation;
-    private Random rnd;
-    private ArrayList<Position> coorList;
+    private Double[][] distance; // A 2D array,shows the distance.i.e Double[i][j] is the distance between
+    // the ith station and jth station.
+    private int NumS; // Number of station
+    //private int bestT; // Best evaluation times.
+    private int[] path; // The drone will travel from coorList.get(path[0]) to coorList.get(path[max_length-1])
+    private Double pathEvaluation; // Total distance the drone need to move, evaluated from path. 
+    private int[] bestPath; // Path with lowest distance travel during current iteration will be considered
+    // as bestPath.
+    private Double bestEvaluation; // Total distance the drone need to move, evaluated from bestpath. 
+    private int[] tempPath; // temporal path.
+    private Double tempEvaluation; //Total distance from the drone need to move, evaluated from temppath.
+    private Random rnd; // random seed.
+    private ArrayList<Position> coorList; // List of position of charge station with positive coins.
     public Annealing(Map map,int n, int t, float t0, float aa,Random rnd,Position startPoint) {
         this.map = map;
         this.N = n;
@@ -29,48 +31,48 @@ public class Annealing {
         this.a = aa;
         this.rnd = rnd;
         coorList = map.getCoorList();
-        coorList = onlyPositive(coorList);
-        NumS = coorList.size()+1; // for start position.
+        coorList = onlyPositive(coorList); // Find all stations with positive coins and record its position. 
+        NumS = coorList.size()+1; // +1 for start position.
         coorList.add(0,startPoint);
         calculateStationDistance(coorList);
-        Path = new int[NumS];
-        Path[0] = 0 ;
+        path = new int[NumS];
+        path[0] = 0 ;
         bestPath = new int[NumS];
         bestEvaluation = Double.MAX_VALUE;
         tempPath = new int[NumS];
         tempEvaluation = Double.MAX_VALUE;
-        bestT = 0;
+        //bestT = 0;
     }
-    private void initGroup() {
+    private void initPath() {
+        // Initialise the path in random.
         int i,j;
-       // Path[0] = rnd.nextInt(NumS);
         for(i=1;i<NumS;) {
-            Path[i] = rnd.nextInt(NumS);
+            path[i] = rnd.nextInt(NumS);
             for(j=0;j<i;j++) {
-                if(Path[i]==Path[j]) break; // To avoid repetition.
+                if(path[i]==path[j]) break; // To avoid repetition.
             }
             if(j==i) i++;
         }
     }
-    // Copy data from Path1 to Path2.
-    private void copyPath(int[] Path1,int[] Path2) {
+    // Copy data from path1 to path2.
+    private void copyPath(int[] path1,int[] path2) {
         int i;
         for(i=0;i<NumS;i++) {
-            Path2[i] = Path1[i];
+            path2[i] = path1[i];
         }
     }
-    public Double evaluate(int[] Path) {
+    public Double evaluate(int[] path) {
         Double len = 0.0;
         int i;
         for(i=1;i<NumS;i++) {
-            len+=distance[Path[i-1]][Path[i]];
+            len+=distance[path[i-1]][path[i]];
         }
-        //len += distance[Path[NumS - 1]][Path[0]];
+        //len += distance[path[NumS - 1]][path[0]];
         return len;
     }
-    private void newPath(int[] Path, int[] tempPath) {
+    private void newPath(int[] path, int[] tempPath) {
         int i,temp,ran1,ran2;
-        copyPath(Path,tempPath);
+        copyPath(path,tempPath);
         ran1 = 0;
         ran2 = 0;
         while (ran1==0||ran1 == ran2||ran2==0) {
@@ -91,10 +93,10 @@ public class Annealing {
         return path;
     }
     public void solve() {
-        initGroup();
-        copyPath(Path,bestPath);
-        bestEvaluation = evaluate(Path);
-        PathEvaluation = bestEvaluation;
+        initPath();
+        copyPath(path,bestPath);
+        bestEvaluation = evaluate(path);
+        pathEvaluation = bestEvaluation;
         int k = 0;
         int n;
         float t = t0;
@@ -103,21 +105,21 @@ public class Annealing {
         while(k<Tem_t) {
             n=0;
             while(n<N) {
-                newPath(Path,tempPath);
+                newPath(path,tempPath);
                 tempEvaluation = evaluate(tempPath);
                 if (tempEvaluation < bestEvaluation) {
                     copyPath(tempPath, bestPath);
-                    bestT = k;
+                    //bestT = k; 
                     bestEvaluation = tempEvaluation;
                 }
                 r = rnd.nextDouble();
-                if(tempEvaluation<PathEvaluation||Math.exp((PathEvaluation - tempEvaluation)/t)>r) {
-//                    Double sss = PathEvaluation - tempEvaluation; 
+                if(tempEvaluation<pathEvaluation||Math.exp((pathEvaluation - tempEvaluation)/t)>r) {
+//                    Double sss = pathEvaluation - tempEvaluation; 
 //                    if(sss<0) {
 //                        System.out.print(sss+"\n");
 //                    }
-                    copyPath(tempPath,Path);
-                    PathEvaluation = tempEvaluation;
+                    copyPath(tempPath,path);
+                    pathEvaluation = tempEvaluation;
                 }
                 n++;
             }
@@ -158,7 +160,7 @@ public class Annealing {
             for(j=i+1;j<NumS;j++) {
                 p1 = coorList.get(i);
                 p2 = coorList.get(j);
-                dis = drone.CalDistance(p1, p2)*200000;
+                dis = drone.calDistance(p1, p2)*200000;
                 distance[i][j] = dis;
                 distance[j][i] = dis;
                 

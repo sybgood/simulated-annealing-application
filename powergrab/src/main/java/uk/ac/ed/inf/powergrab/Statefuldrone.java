@@ -5,35 +5,38 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class Statefuldrone extends drone {
-    private ArrayList<Position> target;
-    private Direction[] nDset = new Direction[7];
-    private static final int[] kk = {0,1,-1,2,-2,3,-3};
-    private static final Direction[] directionSet = Direction.values();
-    private static final int Dlen = directionSet.length;
-    private StringBuilder str = new StringBuilder();
-
+    private ArrayList<Position> target; // A list that guiding the drone, 
+    //which order of position the drone should go.
+    private Direction[] nDset = new Direction[7]; // It contains 7 direction that the drone should go.
+    private static final int[] directionIndex = {0,1,-1,2,-2,3,-3}; // Will be expained in report.
+    private static final Direction[] directionSet = Direction.values(); 
+    private static final int Dlen = directionSet.length; // Indicates how many direction we have.
+    private StringBuilder str = new StringBuilder(); // Trace recording.
+    // Constructor.
     public Statefuldrone(Double latitude, Double longitude,int seed,Map map) {
         super(latitude, longitude, seed, map);
         // TODO Auto-generated constructor stub
     }
     private void getTargetPath() {
+        // By using simulated annealing, get which order of position we should go.
         Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
         a.solve();
         target = a.givePath();
         target.remove(0);
     }
+    // Return the trace record.
     public String toString() {
-        return str.toString();
-        
+        return str.toString(); 
     }
+    //Move function, the drone will not stop until it run out of power or it achieves 250 moves.
     public void statefulMove() {
         getTargetPath();
-        Boolean b;
+        Boolean b; // Indicates whether we got a successful move or not.
         int i;
-        Position np;
+        Position np; // next target charge station's position.
         ArrayList<Integer> remain = new ArrayList<Integer>();
             np = target.get(0);
-            if(isNear(curr,np)) {
+            if(isNear(curr,np)) { // To avoid the drone charge at the begining.
                 target.remove(0);
                 target.add(1,np);
             }
@@ -97,7 +100,7 @@ public class Statefuldrone extends drone {
             if (directionSet[i] == D) index = i;
         }
         int l = 0;
-        for(int j:kk) {
+        for(int j:directionIndex) {
             nDset[l] = directionSet[(index+Dlen+j)%Dlen];
             l++;
         }
