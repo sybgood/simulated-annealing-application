@@ -71,7 +71,7 @@ public class Annealing {
         return len;
     }
     private void newPath(int[] path, int[] tempPath) {
-        int i,temp,ran1,ran2;
+        int temp,ran1,ran2;
         copyPath(path,tempPath);
         ran1 = 0;
         ran2 = 0;

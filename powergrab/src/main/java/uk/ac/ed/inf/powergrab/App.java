@@ -1,12 +1,5 @@
 package uk.ac.ed.inf.powergrab;
 import java.io.*;
-import java.net.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.HashMap;
-import com.mapbox.geojson.*;
-import java.util.Random;
 
 public class App 
 {
@@ -30,6 +23,7 @@ public class App
             title = difficuity+"-"+date+".geojson";
             writeInComputer(contents,title);
         }
+        else System.out.print("No such difficulty");
     }
     private static void writeInComputer(String contents,String title) {
             FileOutputStream bos;
@@ -55,9 +49,26 @@ public class App
         String difficuity = args[6];        
         Map map = new Map(year,month,day);
         String date = day+"-"+month+"-"+year; 
-        long ab =System.currentTimeMillis(); 
+//        for (int i = 1;i<=12;i++) {
+//            String day0;
+//            if(i<10) {
+//            day0 = "0"+i;
+//            }
+//            else day0 = ""+i;
+//            Map map0 = new Map(year,day0,day0);
+//            date = day0+"-"+day0+"-"+year; 
+//            long ab =System.currentTimeMillis(); 
+//            play(latitude,longitude,RNGseed,map0,"stateful",date);
+//            long aa = System.currentTimeMillis();
+//            System.out.println(aa-ab);
+//            Map map1 = new Map(year,day0,day0);
+//            play(latitude,longitude,RNGseed,map1,"stateless",date);
+//            long ac = System.currentTimeMillis();
+//            System.out.println(ac-ab);
+//        }
+//        long ab =System.currentTimeMillis(); 
         play(latitude,longitude,RNGseed,map,difficuity,date);
-        long aa = System.currentTimeMillis();
-        System.out.print(aa-ab);
+//        long aa = System.currentTimeMillis();
+//        System.out.print(aa-ab);
     }
 }

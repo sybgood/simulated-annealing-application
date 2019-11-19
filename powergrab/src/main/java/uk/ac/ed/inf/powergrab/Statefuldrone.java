@@ -1,16 +1,19 @@
 package uk.ac.ed.inf.powergrab;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+//import java.util.Collections;
 import java.util.HashMap;
 
 public class Statefuldrone extends drone {
     private ArrayList<Position> target; // A list that guiding the drone, 
     //which order of position the drone should go.
-    private Direction[] nDset = new Direction[7]; // It contains 7 direction that the drone should go.
-    private static final int[] directionIndex = {0,1,-1,2,-2,3,-3}; // Will be expained in report.
-    private static final Direction[] directionSet = Direction.values(); 
-    private static final int Dlen = directionSet.length; // Indicates how many direction we have.
+    //private Direction[] nDset = new Direction[7]; // It contains 7 direction that the drone should go.
+    //private static final int[] directionIndex = {0,1,-1,2,-2,3,-3}; // Will be expained in report.
+   // private static final Direction[] directionSet = Direction.values(); 
+    //private static final int Dlen = directionSet.length; // Indicates how many direction we have.
     private StringBuilder str = new StringBuilder(); // Trace recording.
     // Constructor.
     public Statefuldrone(Double latitude, Double longitude,int seed,Map map) {
@@ -19,7 +22,9 @@ public class Statefuldrone extends drone {
     }
     private void getTargetPath() {
         // By using simulated annealing, get which order of position we should go.
-        Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
+  //      Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
+        Annealing a = new Annealing(map,1000,200,200.0f,0.995f,rnd,curr);
+
         a.solve();
         target = a.givePath();
         target.remove(0);
@@ -28,12 +33,14 @@ public class Statefuldrone extends drone {
     public String returnTrace() {
         return str.toString(); 
     }
+    
     //Move function, the drone will not stop until it run out of power or it achieves 250 moves.
     public void statefulMove() {
         getTargetPath();
         Boolean b; // Indicates whether we got a successful move or not.
         int i;
         Position np; // next target charge station's position.
+        map.addTrace(curr);
         ArrayList<Integer> remain = new ArrayList<Integer>();
             np = target.get(0);
             if(isNear(curr,np)) { // To avoid the drone charge at the begining.
@@ -45,7 +52,7 @@ public class Statefuldrone extends drone {
             if(!b) {
              if(!canMove()) break;
              remain.add(i);
-             continue;
+//             continue;
             }
         }
         if(i==target.size()) {
@@ -89,91 +96,167 @@ public class Statefuldrone extends drone {
         if(degree>-33.75 && degree<=-11.25) return Direction.ESE;
         return null;
     }
-    private HashMap<Direction,String> haveStation(Position p,Direction D) {
-        HashMap<Direction,String> k = new HashMap<Direction,String>();
-        // wait for map.getCoorList().sort()
-        int i;
-        Position coor;
-        Position nextp;
-        int index=0;
-        for (i = 0;i<Dlen;i++) {
-            if (directionSet[i] == D) index = i;
-        }
-        int l = 0;
-        for(int j:directionIndex) {
-            nDset[l] = directionSet[(index+Dlen+j)%Dlen];
-            l++;
-        }
-        ArrayList<Position> CoorList = map.getCoorList();
-        for (Direction d : nDset) {
-            i = 0;
-            nextp = curr.nextPosition(d);
-            Collections.sort(CoorList,new DistanceComp(nextp));
-            while(true) {
-                coor = CoorList.get(i);
-                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,map.CoordinateId.get(coor));
-                else break;
-                i++;
-            }
-        }
-        return k;        
-    }
+    // Return a hashmap that map from direction to station ID. And the set of direction is the the input direciton itself and 6 nearby direction.
     
+    private boolean isInside(Position p1,ArrayList<Position> ap) {
+        Double d1 = p1.latitude;
+        Double d2 = p1.longitude;
+        for(Position p2:ap) {
+            if( Double.compare(d1, p2.latitude) == 0 && Double.compare(d2, p2.longitude) == 0)
+                return true;
+        }
+        return false;
+    }
     private boolean moveTo(Position p) {
-        HashMap<Direction,String> DStation;
-        Boolean b;
-        ArrayList<Position> CoorList = map.getCoorList();
-        
-        while(p!=CoorList.get(0)||!isNear(curr,p)) {
-            Direction d = targetDirection(curr,p);
-            DStation = haveStation(curr,d);
-            Double prev_latitude =curr.latitude;
-            Double prev_longitude = curr.longitude;
-            
-            if(DStation.isEmpty()) {
-                b = move(d);
-                if(!b&&!canMove()) {
-                 //   System.out.print(b);
-                    return b;
+        ArrayList<ArrayList<Position>> branches = new ArrayList<ArrayList<Position>>();
+        ArrayList<Position> start = new ArrayList<Position>();
+        ArrayList<Position> best = new ArrayList<Position>();
+        ArrayList<Position> explored = new ArrayList<Position>();
+        start.add(curr);
+        branches.add(start);
+        while(!branches.isEmpty()){
+            Position p0 = branches.get(0).get(0);
+            if(isNear(p,p0)) {
+                best = branches.get(0);
+                break;
+            }
+            Boolean delete = false;
+            for(int i=1;i<branches.size();i++) {
+                ArrayList<Position> b = branches.get(i);
+                if(isInside(p0,b)) {
+                    delete=true;
+                    break;
                 }
-                else{str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
-                        +" "+coin+" "+power+"\n");
-                }
+            }
+            if(isInside(p0,explored)||delete) {
+                branches.remove(0);
+                continue;
             }
             else {
-                int i;
-                Direction dd;
-                for(i=0;i<nDset.length;i++) {
-                    dd = nDset[i];
-                    if(!DStation.containsKey(dd)) {
-                        b = move(dd);
-                        if(!b && !canMove()) return b;
-                        if(b){
-                            str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
-                                +" "+coin+" "+power+"\n");
-                            break;
-                        }
-                    }
-                    else {
-                        if(map.IDcoins.get(DStation.get(dd))>=0) {
-                            b = move(dd);
-                            if(!b) {
-                                if(!canMove())return b;
+                explored.add(p0);
+                HashMap<Direction,String> DStation;
+                ArrayList<Position> temp;
+                    temp = branches.get(0);
+                    ArrayList<Direction> directionSet = new ArrayList<Direction>();
+//                    Position pp = new Position(55.9437410500966,-3.1873695165273106);
+//                    DStation = haveStation(pp);
+//                    System.out.println("oops");
+                    DStation = haveStation(temp.get(0));
+                    for(Direction d: Direction.values()) {
+                        if(DStation.containsKey(d)) {
+                            if(map.IDcoins.get(DStation.get(d))<0) {
                                 continue;
                             }
-                            super.meetChargeStation(DStation.get(dd));
-                            str.append(prev_latitude+" "+prev_longitude+" "+d+" "+curr.latitude+" "+curr.longitude
-                                    +" "+coin+" "+power+"\n");
-                            break;
                         }
+                        directionSet.add(d);
                     }
-                }
-                if(i==nDset.length) return false;
+                    for (Direction d:directionSet) {
+                        ArrayList<Position> ttmp = new ArrayList<Position>(temp);
+                        ttmp.add(0,p0.nextPosition(d));
+                        branches.add(ttmp);
+                    }
+                    branches.remove(temp);
+                    Collections.sort(branches,new heurstic(p));
             }
-            Collections.sort(CoorList,new DistanceComp(curr));
         }
-        super.meetChargeStation(map.CoordinateId.get(p));
-        return true;
+        if(!best.isEmpty()) {
+            int i;
+            Position p0;
+            Double prev_latitude;
+            Double prev_longitude;
+            for(i=best.size()-2;i>=0;i--) {
+                prev_latitude =curr.latitude;
+                prev_longitude = curr.longitude;
+                p0 = best.get(i);
+                Direction d = targetDirection(curr,p0);
+                if(super.canMove()) {
+                    super.move(d);
+                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                            +","+coin+","+power+"\n");
+                    System.out.print(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                            +","+coin+","+power+"\n");
+                    super.meetChargeStation(map.CoordinateId.get(p));
+                }
+                System.out.println(steps);
+            }
+            return true;
+        }
+        else return false;
+//        HashMap<Direction,String> DStation;
+//        Boolean b;
+//
+//        ArrayList<Position> CoorList = map.getCoorList();
+//        Collections.sort(CoorList,new DistanceComp(curr));
+//        while(p!=CoorList.get(0)||!isNear(curr,p)) {
+//            Direction d = targetDirection(curr,p);
+//            DStation = haveStation(curr,d);
+//            Double prev_latitude =curr.latitude;
+//            Double prev_longitude = curr.longitude;
+//            if(DStation.isEmpty()) {
+//                b = move(d);
+//                if(!b&&!canMove()) {
+//                 //   System.out.print(b);
+//                    return b;
+//                }
+//                else{str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+//                        +","+coin+","+power+"\n");
+//                }
+//            }
+//            else {
+//                int i;
+//                Direction dd;
+//                int random_number =rnd.nextInt(5);
+//                for(i=0;i<nDset.length;i++) {
+//                    dd = nDset[(i+random_number)%7];
+//                    if(!DStation.containsKey(dd)){
+//                        b = move(dd);
+//                        if(!b && !canMove()) return b;
+//                        if(b){
+//                            str.append(prev_latitude+","+prev_longitude+","+dd+","+curr.latitude+","+curr.longitude
+//                                +","+coin+","+power+"\n");
+//                            break;
+//                        }
+//                    }
+//                    else {
+//                        if(map.IDcoins.get(DStation.get(dd))>=0) {
+//                            b = move(dd);
+//                            if(!b) {
+//                                if(!canMove())return b;
+//                                continue;
+//                            }
+//                            super.meetChargeStation(DStation.get(dd));
+//                            str.append(prev_latitude+","+prev_longitude+","+dd+","+curr.latitude+","+curr.longitude
+//                                    +","+coin+","+power+"\n");
+//                            break;
+//                        }
+//                    }
+//                }
+//                if(i==nDset.length) return false;
+//            }
+//            Collections.sort(CoorList,new DistanceComp(curr));
+//        }
+//        super.meetChargeStation(map.CoordinateId.get(p));
+//        return true;
+        
+    }
+    class heurstic implements Comparator<ArrayList<Position>>{
+        private Position TargetP;
+        public heurstic(Position p) {
+            TargetP = p;
+        }
+        @Override
+        public int compare(ArrayList<Position> b1, ArrayList<Position> b2) {
+            // TODO Auto-generated method stub
+            Double h0 = calDistance(b1.get(0),TargetP);
+            Double h1 = calDistance(b2.get(0),TargetP);
+            Double g0 = b1.size()*0.0003;
+            Double g1 = b2.size()*0.0003;
+            Double f0 = h0+g0;
+            Double f1 = h1+g1;
+            return (f0>=f1)? 1 : -1;
+        }
+
+        
+        
     }
 }
-

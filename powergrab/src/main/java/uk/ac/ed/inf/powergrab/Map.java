@@ -14,15 +14,11 @@ public class Map {
     protected HashMap<Position,String> CoordinateId = new HashMap<Position,String>();
     protected HashMap<String,Double> IDcoins = new HashMap<String,Double>();
     protected HashMap<String,Double> IDpower = new HashMap<String,Double>();
-    private ArrayList<String> ID = new ArrayList<String>();
     private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
     private List<Point> trace = new ArrayList<Point>();
     private String result;
     
-    
-    public ArrayList<String> getIDlist() {
-    return ID;
-    }
+ 
 
     public ArrayList<Position> getCoorList(){
         return this.CoordinatedList;
@@ -53,7 +49,6 @@ public class Map {
     private String CoinPower(Feature f) {
         JsonElement id = f.getProperty("id");
         String ids = id.getAsString(); 
-        ID.add(ids);
         JsonElement coin = f.getProperty("coins");
         Double coins = (double) coin.getAsFloat();
         JsonElement power = f.getProperty("power");

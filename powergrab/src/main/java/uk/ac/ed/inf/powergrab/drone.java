@@ -1,7 +1,6 @@
 package uk.ac.ed.inf.powergrab;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -92,5 +91,24 @@ public abstract class drone {
             map.IDpower.put(ID,Station_power);
         }
     }
-
+    protected HashMap<Direction,String> haveStation(Position p) { 
+        HashMap<Direction,String> k = new HashMap<Direction,String>();
+        int i;
+        Position coor;
+        Position nextp;
+        for (Direction d : Direction.values()) { // Travesal all the directions
+            i = 0;
+            nextp = p.nextPosition(d); 
+            ArrayList<Position> CoorList = map.getCoorList();
+            // Sort the station consider the distance to the next position.
+            Collections.sort(CoorList,new DistanceComp(nextp));
+            while(true) {
+                coor = CoorList.get(i);
+                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,map.CoordinateId.get(coor));
+                else break;
+                i++;
+            }
+        }
+        return k;
+    }
 }
