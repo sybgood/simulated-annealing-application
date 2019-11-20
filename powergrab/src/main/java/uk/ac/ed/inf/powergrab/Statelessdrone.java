@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 public class Statelessdrone extends drone {
+    protected Position nearStation = new Position(0,0);  // Position for the station then the drone will charge.
 
     public Statelessdrone(Double latitude, Double longitude,int seed, Map map) {
         super(latitude, longitude, seed, map);
@@ -12,17 +13,17 @@ public class Statelessdrone extends drone {
     
     public Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range, 
         //then go towards that station, otherwise return a random direction.
-        HashMap<Direction,String> h = haveStation(curr);
+        HashMap<Direction,Position> h = haveStation(curr);
         Direction[] directionSet = Direction.values();
         List<Direction>Directionlist = new ArrayList<Direction>(Arrays.asList(directionSet));
         if(!h.isEmpty()) {   
             for (Direction d:h.keySet()) {
-                String Id = h.get(d);
-                if(map.IDpower.get(Id)>0) {
-                    nearStation = Id;
+                Position chargeStation = h.get(d);
+                if(map.PositionPower.get(chargeStation)>0) {
+                    nearStation = chargeStation;
                     return d;
                 }
-                if(map.IDpower.get(Id)<0) {
+                if(map.PositionPower.get(chargeStation)<0) {
                     Directionlist.remove(d);
                 }
             }
@@ -38,7 +39,9 @@ public class Statelessdrone extends drone {
     }
 
     // Move function, the drone will not stop until it run out of power or it achieves 250 moves.
-    public String statelessMove() {
+
+    @Override
+    public String move() {
         StringBuilder s = new StringBuilder(); // Record the trace.
         Boolean isSuccess; // Indicates whether the movement is success or not.
         Double prev_latitude;
@@ -52,10 +55,10 @@ public class Statelessdrone extends drone {
             prev_longitude = curr.longitude;
             
             isSuccess = super.move(d); // Move.
-            if(!nearStation.isEmpty()) // Check whether we got a station within the range.
+            if(nearStation.inPlayArea()) // Check whether we got a station within the range.
             {
                 super.meetChargeStation(nearStation); // Charge
-                nearStation = ""; // Initialise the nearStation.
+                nearStation.latitude = 0; // Initialise the nearStation.
             }
             if(isSuccess) { // If moving success, we will record this move.
                 s.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude

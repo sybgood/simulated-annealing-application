@@ -11,7 +11,6 @@ public abstract class drone {
     protected Position curr; // Current position
     protected Map map; // The map it store.
     protected final Random rnd; // Randome seed.
-    protected String nearStation="";  // Id for the station then the drone will charge.
     
     // Constructor
     public drone(Double latitude,Double longitude,int seed,Map map) {
@@ -33,6 +32,7 @@ public abstract class drone {
         }
         return false;
     }
+    public abstract String move();
     
     public Map getMap() {
         return map;
@@ -59,16 +59,16 @@ public abstract class drone {
         return (calDistance(p1,p2)<=0.00025);
     }
     
-    protected void meetChargeStation(String ID) {
-        Double Station_power = map.IDpower.get(ID);
-        Double Station_coin = map.IDcoins.get(ID);
+    protected void meetChargeStation(Position ID) {
+        Double Station_power = map.PositionPower.get(ID);
+        Double Station_coin = map.PositionCoins.get(ID);
         if(Station_power>=0) {
             power += Station_power;
             Station_power = 0.0;
             coin += Station_coin;
             Station_coin = 0.0;
-            map.IDcoins.put(ID,Station_coin);
-            map.IDpower.put(ID,Station_power);
+            map.PositionCoins.put(ID,Station_coin);
+            map.PositionPower.put(ID,Station_power);
         }
         else {
             if(coin>Station_coin) {
@@ -87,12 +87,12 @@ public abstract class drone {
                 Station_power+=power;
                 power=0.0;
             }
-            map.IDcoins.put(ID,Station_coin);
-            map.IDpower.put(ID,Station_power);
+            map.PositionCoins.put(ID,Station_coin);
+            map.PositionPower.put(ID,Station_power);
         }
     }
-    protected HashMap<Direction,String> haveStation(Position p) { 
-        HashMap<Direction,String> k = new HashMap<Direction,String>();
+    protected HashMap<Direction,Position> haveStation(Position p) { 
+        HashMap<Direction,Position> k = new HashMap<Direction,Position>();
         int i;
         Position coor;
         Position nextp;
@@ -104,7 +104,7 @@ public abstract class drone {
             Collections.sort(CoorList,new DistanceComp(nextp));
             while(true) {
                 coor = CoorList.get(i);
-                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,map.CoordinateId.get(coor));
+                if(isNear(nextp,coor)&&!k.containsKey(d)) k.put(d,coor);
                 else break;
                 i++;
             }

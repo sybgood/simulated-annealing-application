@@ -6,7 +6,7 @@ public class App
     private static void play(Double latitude, Double longitude,int seed,Map map,String difficuity,String date) {
         if(difficuity.equals("stateless")) {
             Statelessdrone d= new  Statelessdrone(latitude, longitude, seed, map);
-            String contents = d.statelessMove();
+            String contents = d.move();
             String title = difficuity+"-"+date+".txt";
             writeInComputer(contents,title);
             contents = d.map.outputJson();
@@ -15,8 +15,7 @@ public class App
         }
         else if(difficuity.equals("stateful")) {
             Statefuldrone sd = new Statefuldrone(latitude,longitude,seed,map);
-            sd.statefulMove();
-            String contents = sd.returnTrace();
+            String contents = sd.move();
             String title = difficuity+"-"+date+".txt";
             writeInComputer(contents,title);
             contents = sd.map.outputJson();

@@ -11,9 +11,8 @@ import com.mapbox.geojson.*;
 import java.util.ArrayList;
 public class Map {
     
-    protected HashMap<Position,String> CoordinateId = new HashMap<Position,String>();
-    protected HashMap<String,Double> IDcoins = new HashMap<String,Double>();
-    protected HashMap<String,Double> IDpower = new HashMap<String,Double>();
+    protected HashMap<Position,Double> PositionCoins = new HashMap<Position,Double>();
+    protected HashMap<Position,Double> PositionPower = new HashMap<Position,Double>();
     private ArrayList<Position> CoordinatedList = new ArrayList<Position>();
     private List<Point> trace = new ArrayList<Point>();
     private String result;
@@ -23,14 +22,6 @@ public class Map {
     public ArrayList<Position> getCoorList(){
         return this.CoordinatedList;
     }
-    
-    private void fetch_coor(Geometry g,String id) {
-        Point p = (Point)(g);
-        Position coor = new Position(p.latitude(),p.longitude());
-        CoordinateId.put(coor,id);
-        CoordinatedList.add(coor);
-    }
-    
 
     public void addTrace(Position pp) {
         Point p = Point.fromLngLat(pp.longitude, pp.latitude);
@@ -46,16 +37,17 @@ public class Map {
         fc = FeatureCollection.fromFeatures(fl);
         return fc.toJson();
     }
-    private String CoinPower(Feature f) {
-        JsonElement id = f.getProperty("id");
-        String ids = id.getAsString(); 
+    private void CoinPower(Feature f) {
+        Geometry g = f.geometry();
+        Point p = (Point)(g);
+        Position coor = new Position(p.latitude(),p.longitude());
         JsonElement coin = f.getProperty("coins");
         Double coins = (double) coin.getAsFloat();
         JsonElement power = f.getProperty("power");
         Double powers = (double) power.getAsFloat();
-        IDcoins.put(ids, coins);
-        IDpower.put(ids, powers);
-        return ids;
+        PositionCoins.put(coor, coins);
+        PositionPower.put(coor, powers);
+        CoordinatedList.add(coor);
     }
     // Constructor
     public Map(String year,String month,String day) {
@@ -74,10 +66,7 @@ public class Map {
                 FeatureCollection fc = FeatureCollection.fromJson(result);
                 for (Feature f : fc.features()) {
 //-------------- store map information--------------------------------------------
-                    String ids = CoinPower(f);
-//-----------------Fetch coordinates for current feature---------------------------------                
-                    Geometry g = f.geometry();
-                    fetch_coor(g,ids); 
+                    CoinPower(f);
                 }
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block

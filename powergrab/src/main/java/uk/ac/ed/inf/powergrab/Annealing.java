@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Annealing {
-    private Map map;
     private int N;// Number of iteration times
     private int Tem_t;// Annealing times. 
     private float a;// Annealing weight factor.
     private float t0;// initial temperature
-     
     private Double[][] distance; // A 2D array,shows the distance.i.e Double[i][j] is the distance between
     // the ith station and jth station.
     private int NumS; // Number of station
@@ -24,14 +22,13 @@ public class Annealing {
     private Random rnd; // random seed.
     private ArrayList<Position> coorList; // List of position of charge station with positive coins.
     public Annealing(Map map,int n, int t, float t0, float aa,Random rnd,Position startPoint) {
-        this.map = map;
         this.N = n;
         this.Tem_t = t;
         this.t0 = t0;
         this.a = aa;
         this.rnd = rnd;
         coorList = map.getCoorList();
-        coorList = onlyPositive(coorList); // Find all stations with positive coins and record its position. 
+        coorList = onlyPositive(coorList,map); // Find all stations with positive coins and record its position. 
         NumS = coorList.size()+1; // +1 for start position.
         coorList.add(0,startPoint);
         calculateStationDistance(coorList);
@@ -137,13 +134,11 @@ public class Annealing {
 //            }
 //        }
     }
-    private ArrayList<Position> onlyPositive (ArrayList<Position> coorList){
-        String id;
+    private ArrayList<Position> onlyPositive (ArrayList<Position> coorList,Map map){
         Double c;
         ArrayList<Position> cc = new ArrayList<Position>();
         for(Position p : coorList) {
-            id = map.CoordinateId.get(p);
-            c = map.IDcoins.get(id);
+            c = map.PositionCoins.get(p);
             if(c>=0) cc.add(p);
         }
         return cc;
