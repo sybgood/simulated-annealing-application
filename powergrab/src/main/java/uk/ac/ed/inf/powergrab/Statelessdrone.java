@@ -3,15 +3,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+/**
+ * @author s1742667
+ */
 public class Statelessdrone extends drone {
     protected Position nearStation = new Position(0,0);  // Position for the station then the drone will charge.
-
-    public Statelessdrone(Double latitude, Double longitude,int seed, Map map) {
+    /**
+     * Constructor, do the same thing as its parent class.
+     */
+    protected Statelessdrone(Double latitude, Double longitude,int seed, Map map) {
         super(latitude, longitude, seed, map);
         // TODO Auto-generated constructor stub
     }
-    
-    public Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range, 
+    /**
+     * Tell the drone which way to go.
+     */
+    protected Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range, 
         //then go towards that station, otherwise return a random direction.
         HashMap<Direction,Position> h = haveStation(curr);
         Direction[] directionSet = Direction.values();
@@ -38,29 +45,31 @@ public class Statelessdrone extends drone {
         return d;
     }
 
-    // Move function, the drone will not stop until it run out of power or it achieves 250 moves.
-
+    /**
+     * 
+     * Stateless drone's play function. When call, the stateless drone will keep moving until it run out of power/steps.
+     * 
+     */
     @Override
-    public String move() {
-        StringBuilder s = new StringBuilder(); // Record the trace.
-        Boolean isSuccess; // Indicates whether the movement is success or not.
+    protected String play() {
+        StringBuilder s = new StringBuilder(); 
+        Boolean isSuccess; 
         Double prev_latitude;
         Double prev_longitude;
         map.addTrace(curr);
         while(steps>0) {
             if(power<=0) break;
             Direction d = statelessSearch(); // Select a direction.
-            // record the current latitude and longitude.
             prev_latitude =curr.latitude;
             prev_longitude = curr.longitude;
             
-            isSuccess = super.move(d); // Move.
-            if(nearStation.inPlayArea()) // Check whether we got a station within the range.
+            isSuccess = super.move(d); 
+            if(nearStation.inPlayArea()) 
             {
-                super.meetChargeStation(nearStation); // Charge
-                nearStation.latitude = 0; // Initialise the nearStation.
+                super.meetChargeStation(nearStation); 
+                nearStation.latitude = 0; 
             }
-            if(isSuccess) { // If moving success, we will record this move.
+            if(isSuccess) { 
                 s.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
                         +","+coin+","+power+"\n");
             }          

@@ -12,13 +12,33 @@ public abstract class drone {
     protected Map map; // The map it store.
     protected final Random rnd; // Randome seed.
     
-    // Constructor
+    /**
+     * 
+     * @param latitude 
+     * @param longitude
+     * @param seed
+     * @param map
+     * 
+     * Drone constructor. Laitude and longitude are the starting position.
+     * Meanwhile, we make a random number generator rnd by the given seed.
+     * Also it stores a map in its fields.
+     * 
+     */
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
         this.map = map;
         rnd = new Random(seed);
     }
-    // Move to the given direction, return whether success.
+    /**
+     * 
+     * @param direction
+     * @return boolean value, indicates whether this move is success or not.
+     * Move the drone to the given direction.
+     * Move may failed in 
+     * 1. the target position is invalid(not in play area)
+     * 2. Not enough power
+     * 3. Drone has already reach 250 steps.
+     */
     protected Boolean move(Direction direction) {
         Position next = curr.nextPosition(direction);
         if (canMove()) {
@@ -32,65 +52,92 @@ public abstract class drone {
         }
         return false;
     }
-    public abstract String move();
-    
-    public Map getMap() {
-        return map;
-    }
-    // Check self power and steps.
+    /**
+     * 
+     *@return  a string which is the movement log for the drone.
+     */
+    protected abstract String play();
+
+    /**
+     * 
+     * @return Boolean value shows whether the drone can move or not.
+     * It has 2 condition. The drone must have enough power, and the drone still doesn't reach 250 steps.
+     */
     protected Boolean canMove() {
-        if (power>1.25&&steps>0) return true;
-        return false;
+        return (power>=1.25&&steps>0);
     }
-    // Give a certain position, check whether there exist a position in its next move.
-    // Please see the report to get the full details.
-    // Return a hashmap with direction as key, and the Station's Id as values
-
-
-    public static Double calDistance(Position p1, Position p2) {
+    /**
+     * 
+     * @param p1 Position
+     * @param p2 Position
+     * @return Euclidean distance between p1 and p2.
+     */
+    protected static Double calDistance(Position p1, Position p2) {
         Double x1 = p1.latitude;
         Double x2 = p2.latitude;
         Double y1 = p1.longitude;
         Double y2 = p2.longitude;
         return (Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2)));
     }
-    
-    public static Boolean isNear(Position p1, Position p2) {
+    /**
+     * 
+     * @param p1 Position
+     * @param p2 Position
+     * @return whether p1 and p2 are within 0.00025 unit range.
+     */
+    protected static Boolean isNear(Position p1, Position p2) {
         return (calDistance(p1,p2)<=0.00025);
     }
-    
-    protected void meetChargeStation(Position ID) {
-        Double Station_power = map.PositionPower.get(ID);
-        Double Station_coin = map.PositionCoins.get(ID);
-        if(Station_power>=0) {
-            power += Station_power;
-            Station_power = 0.0;
-            coin += Station_coin;
-            Station_coin = 0.0;
-            map.PositionCoins.put(ID,Station_coin);
-            map.PositionPower.put(ID,Station_power);
-        }
-        else {
-            if(coin>Station_coin) {
+    /**
+     * 
+     * @param p0
+     * p0 should be a station's position. If so, the drone will charge from its corresponding station.
+     */
+    protected void meetChargeStation(Position p0) {
+        if(map.getCoorList().contains(p0)) {
+            Double Station_power = map.PositionPower.get(p0);
+            Double Station_coin = map.PositionCoins.get(p0);
+            if(Station_power>=0) {
+                power += Station_power;
+                Station_power = 0.0;
                 coin += Station_coin;
                 Station_coin = 0.0;
+                map.PositionCoins.put(p0,Station_coin);
+                map.PositionPower.put(p0,Station_power);
             }
             else {
-                coin=0.0;
-                Station_coin+=coin;
+                if(coin>Station_coin) {
+                    coin += Station_coin;
+                    Station_coin = 0.0;
+                }
+                else {
+                    coin=0.0;
+                    Station_coin+=coin;
+                }
+                if(power>Station_power) {
+                    power+=Station_power;
+                    Station_power=0.0;
+                }
+                else {
+                    Station_power+=power;
+                    power=0.0;
+                }
+                map.PositionCoins.put(p0,Station_coin);
+                map.PositionPower.put(p0,Station_power);
             }
-            if(power>Station_power) {
-                power+=Station_power;
-                Station_power=0.0;
-            }
-            else {
-                Station_power+=power;
-                power=0.0;
-            }
-            map.PositionCoins.put(ID,Station_coin);
-            map.PositionPower.put(ID,Station_power);
         }
+        else System.out.print("This position is not a valid charge stations' position!");
     }
+    /**
+     * 
+     * @param p Position current position
+     * @return Hashmap with direction as a key, position is the charge station position.
+     * haveStation first travel 16 direction, find which direction may lead the drone to a charge stations' charge range.
+     * If direction D can let the drone charge from a charge station S, then we put (D,position of S) to the map. 
+     * Otherwise we do nothing to the map.
+     * 
+     */
+
     protected HashMap<Direction,Position> haveStation(Position p) { 
         HashMap<Direction,Position> k = new HashMap<Direction,Position>();
         int i;

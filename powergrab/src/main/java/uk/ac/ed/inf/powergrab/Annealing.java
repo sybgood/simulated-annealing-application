@@ -21,7 +21,7 @@ public class Annealing {
     private Double tempEvaluation; //Total distance from the drone need to move, evaluated from temppath.
     private Random rnd; // random seed.
     private ArrayList<Position> coorList; // List of position of charge station with positive coins.
-    public Annealing(Map map,int n, int t, float t0, float aa,Random rnd,Position startPoint) {
+    protected Annealing(Map map,int n, int t, float t0, float aa,Random rnd,Position startPoint) {
         this.N = n;
         this.Tem_t = t;
         this.t0 = t0;
@@ -58,7 +58,7 @@ public class Annealing {
             path2[i] = path1[i];
         }
     }
-    public Double evaluate(int[] path) {
+    protected Double evaluate(int[] path) {
         Double len = 0.0;
         int i;
         for(i=1;i<NumS;i++) {
@@ -80,7 +80,7 @@ public class Annealing {
         tempPath[ran1] = tempPath[ran2];
         tempPath[ran2] = temp;
     }
-    public ArrayList<Position> givePath(){
+    protected ArrayList<Position> givePath(){
         int i,j;
         ArrayList<Position> path = new ArrayList<Position>();
         for(i=0;i<NumS;i++) {
@@ -89,7 +89,7 @@ public class Annealing {
         }
         return path;
     }
-    public void solve() {
+    protected void solve() {
         initPath();
         copyPath(path,bestPath);
         bestEvaluation = evaluate(path);

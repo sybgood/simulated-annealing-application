@@ -1,8 +1,8 @@
 package uk.ac.ed.inf.powergrab;
 
 public class Position { 
-    public double latitude;
-    public double longitude;
+    protected double latitude;
+    protected double longitude;
     private static final double r = 0.0003;//movement speed
     private static final double w2 = r*Math.cos(67.5*Math.PI/180);
     private static final double h2 = r*Math.sin(67.5*Math.PI/180);
@@ -10,11 +10,11 @@ public class Position {
     private static final double h3 = r*Math.sin(45*Math.PI/180);
     private static final double w4 = r*Math.cos(22.5*Math.PI/180);
     private static final double h4 = r*Math.sin(22.5*Math.PI/180);
-    public Position(double latitude, double longitude) { 
+    protected Position(double latitude, double longitude) { 
         this.latitude  = latitude;
         this.longitude = longitude;
     }
-    public Position nextPosition(Direction direction) {
+    protected Position nextPosition(Direction direction) {
         switch (direction) {
             case S:
                 return new Position (latitude - r, longitude);
@@ -52,7 +52,10 @@ public class Position {
         }
             
         }
-    public boolean inPlayArea() { 
+    /*
+     * Check whether current position is in play area.
+     */
+    protected boolean inPlayArea() { 
         if (this.latitude<=55.942617||this.latitude>=55.946233) return false;;
         if (this.longitude<=-3.192473||this.longitude>=-3.184319) return false;
         return true;
