@@ -189,9 +189,13 @@ public class Statefuldrone extends drone {
                         directionSet.add(d);
                     }
                     if(!directionSet.isEmpty()) {
+                        Position pk;
                         for (Direction d:directionSet) {
                             ArrayList<Position> ttmp = new ArrayList<Position>(temp);
-                            ttmp.add(0,p0.nextPosition(d));
+                            pk = p0.nextPosition(d);
+                            if(pk.inPlayArea()) {
+                            ttmp.add(0,pk);
+                            }
                             branches.add(ttmp);
                         }
                         branches.remove(temp);

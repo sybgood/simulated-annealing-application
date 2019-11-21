@@ -98,7 +98,8 @@ public abstract class drone {
         Position nextp;
         for (Direction d : Direction.values()) { // Travesal all the directions
             i = 0;
-            nextp = p.nextPosition(d); 
+            nextp = p.nextPosition(d);
+            if(!nextp.inPlayArea()) continue;
             ArrayList<Position> CoorList = map.getCoorList();
             // Sort the station consider the distance to the next position.
             Collections.sort(CoorList,new DistanceComp(nextp));
