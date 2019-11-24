@@ -68,7 +68,6 @@ public class Statefuldrone extends drone {
         Boolean b; 
         int i;
         map.addTrace(curr);
-        ArrayList<Integer> remain = new ArrayList<Integer>(); // Remain stores the position that the drone failed in reaching.
         int j=0;    
         int target_size = target.size();
         /* Travelling all the position stored in target, if moving success, we remove that position in target list.*/
@@ -76,7 +75,6 @@ public class Statefuldrone extends drone {
             b = moveTo(target.get(j));
             if(!b) {
              if(!canMove()) return str.toString();
-             remain.add(j);
              j++;
             }
             else {
@@ -85,60 +83,32 @@ public class Statefuldrone extends drone {
         }
         /*The drone has already tried travelling all the targets*/
             System.out.println(250-steps);
-            int remain_size =remain.size();
             While0:
             while(canMove()) {
-                if(!remain.isEmpty()) {
+                if(!target.isEmpty()) {
                     j=0;
-                    for(i=0;i<remain_size;i++) {
-                        b = moveTo(target.get(remain.get(i)));                       
+                    for(i=0;i<target.size();i++) {
+                        b = moveTo(target.get(j));                       
                         if(!b) {
                             if(!canMove()) break While0;
                             j++;
                         }
-                        else remain.remove(j);
+                        else target.remove(j);
                     }
                 }
                 /*If we charged all positive station, we just random select good direction to move*/
-                if(remain_size==0) {
+                if(target.size()==0) {
                     while(canMove()) {
                         randomMove();
                     }
                     return str.toString();
                 }
-                else if(remain.size()!=remain_size) {
-                    randomMove();
-                }
-                /*Following code will be excuted only when the drone is surrounded by the negative charge station, which means
-                 * any direction will lead the drone lose its power.
-                 */
-                else {
-                    HashMap<Position,Double> modifycoins= new HashMap<Position,Double>();
-                    HashMap<Position,Double> modifypower= new HashMap<Position,Double>();
-                    Position nc = CoorList.get(0);
-                    Double coins;
-                    Double powers;
-                    do{
-                        Collections.sort(CoorList,new DistanceComp(curr));
-                        for (i=0;i<CoorList.size();i++) {
-                            nc = CoorList.get(i);
-                            coins = map.PositionCoins.get(nc);
-                            powers = map.PositionCoins.get(nc);
-                            if(coins<0) {
-                                modifycoins.put(nc,2*coins);
-                                modifypower.put(nc, 2*powers);
-                                map.PositionCoins.put(nc, -coins);
-                                map.PositionPower.put(nc, -powers);
-                                break;
-                            }
+                else  {
+                    for(i=0;i<target.size();i++) {
+                        while(canMove()) {
+                            this.unLimitedMoveTo(target.get(i));
                         }
-                    } while(!moveTo(nc));
-                    for(Position p0 :modifycoins.keySet()) {
-                        map.PositionCoins.put(p0,modifycoins.get(p0));
-                        map.PositionCoins.put(p0,modifypower.get(p0));
                     }
-                    super.meetChargeStation(nc);
-                    play();
                 }
             }
         return str.toString(); 
@@ -295,6 +265,111 @@ public class Statefuldrone extends drone {
         else return false;   
     }
     /**
+     * 
+     * @param p
+     * @return
+     * Another moveTo method, the difference between this and MoveTo is that the unLimitedMoveTo
+     * has no limitations, i.e Branches.size<30; And also it will consider pass through the
+     * negative charge station.
+     * It is designed for the situation that drone is surrounded by negative stations.
+     */
+    private boolean unLimitedMoveTo(Position p) {
+        ArrayList<ArrayList<Position>> branches = new ArrayList<ArrayList<Position>>();
+        ArrayList<Position> start = new ArrayList<Position>();
+        ArrayList<Position> best = new ArrayList<Position>();
+        ArrayList<Position> explored = new ArrayList<Position>();
+        start.add(curr);
+        branches.add(start);
+        while(!branches.isEmpty()){
+            Position p0 = branches.get(0).get(0);
+            Position charge_station = findClosest(p0);
+            if(branches.get(0).size()>1&&isNear(p,p0)&&charge_station.equals(p)) {
+                best = branches.get(0);
+                break;
+            }
+            
+            Boolean delete = false;
+            for(int i=1;i<branches.size();i++) {
+                ArrayList<Position> b = branches.get(i);
+                if(isInside(p0,b)) {
+                    delete=true;
+                    break;
+                }
+            }
+            if(isInside(p0,explored)||delete) {
+                branches.remove(0);
+                continue;
+            }
+            else {
+                explored.add(p0);
+                HashMap<Direction, Position> DStation;
+                ArrayList<Position> temp;
+                    temp = branches.get(0);
+                    ArrayList<Direction> directionSet = new ArrayList<Direction>();
+//                    Position pp = new Position(55.9437410500966,-3.1873695165273106);
+//                    DStation = haveStation(pp);
+//                    System.out.println("oops");
+                    DStation = haveStation(temp.get(0));
+                    for(Direction d: Direction.values()) {
+                        if(DStation.containsKey(d)) {
+                            if(map.PositionCoins.get(DStation.get(d))<0) {
+                                continue;
+                            }
+                        }
+                        directionSet.add(d);
+                    }
+                    if(directionSet.isEmpty()) {
+                        Double leastLost = -10000.0;
+                        Direction k = Direction.N;
+                        for (Direction d:DStation.keySet()) {
+                            Position pk = p0.nextPosition(d);
+                            if(pk.inPlayArea()) {
+                                if(map.PositionCoins.get(DStation.get(d))>leastLost) {
+                                    k = d;
+                                    leastLost = map.PositionCoins.get(DStation.get(d));
+                                }
+                            }
+                        }
+                        directionSet.add(k);
+                    }
+                        Position pk;
+                    for (Direction d:directionSet) {
+                        ArrayList<Position> ttmp = new ArrayList<Position>(temp);
+                        pk = p0.nextPosition(d);
+                        if(pk.inPlayArea()) {
+                        ttmp.add(0,pk);
+                        }
+                        branches.add(ttmp);
+                    }
+                    branches.remove(temp);
+                    Collections.sort(branches,new heurstic(p));               
+            }
+        }
+        if(!best.isEmpty()) {
+            int i;
+            Position p0;
+            Double prev_latitude;
+            Double prev_longitude;
+            for(i=best.size()-2;i>=0;i--) {
+                prev_latitude =curr.latitude;
+                prev_longitude = curr.longitude;
+                p0 = best.get(i);
+                Direction d = targetDirection(curr,p0);
+                Position charge_station = findClosest(p0);
+                if(super.canMove()) {
+                    super.move(d);
+                    if(isNear(curr,charge_station)) super.meetChargeStation(charge_station);
+                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                            +","+coin+","+power+"\n");
+                }
+            }
+            return true;
+        }
+        else return false;   
+    }
+    
+    
+    /**
      * Inner class, override of comparator.
      * Act like heurstic function.
      */
@@ -326,9 +401,6 @@ public class Statefuldrone extends drone {
             Double f0 = h0+g0;
             Double f1 = h1+g1;
             return (f0>=f1)? 1 : -1;
-        }
-
-        
-        
+        } 
     }
 }
