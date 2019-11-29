@@ -37,7 +37,7 @@ public class App
             title = difficulty+"-"+date+".geojson";
             writeInComputer(contents,title);
         }
-        else System.out.print("No such difficulty");
+        else throw new IllegalArgumentException ("No such difficulty, please make sure your input difficulty is either stateless or stateful!");
     }
     /**
      * 
@@ -66,15 +66,25 @@ public class App
      */
     public static void main( String[] args )
     {
-        String day = args[0];
-        String month = args[1];
-        String year = args[2];
-        Double latitude = Double.parseDouble(args[3]);
-        Double longitude = Double.parseDouble(args[4]);
-        Integer RNGseed = Integer.parseInt(args[5]);
-        String difficulty = args[6];        
-        Map map = new Map(year,month,day);
-        String date = day+"-"+month+"-"+year; 
+        try {
+            String day = args[0];
+            String month = args[1];
+            String year = args[2];
+            Double latitude = Double.parseDouble(args[3]);
+            Double longitude = Double.parseDouble(args[4]);
+            Integer RNGseed = Integer.parseInt(args[5]);
+            String difficulty = args[6];        
+            Map map = new Map(year,month,day);
+            String date = day+"-"+month+"-"+year; 
+            long aa = System.currentTimeMillis();
+            play(latitude,longitude,RNGseed,map,difficulty,date);
+            long ab =System.currentTimeMillis(); 
+            System.out.print(ab-aa);
+        }
+        catch(NumberFormatException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("input type of latitude or longitude or seed is illegal!");
+        }
 //        for (int i = 1;i<=12;i++) {
 //            String day0;
 //            if(i<10) {
@@ -92,10 +102,5 @@ public class App
 //            long ac = System.currentTimeMillis();
 //            System.out.println(ac-ab);
 //        }
-//        long ab =System.currentTimeMillis(); 
-        play(latitude,longitude,RNGseed,map,difficulty,date);
-//        long aa = System.currentTimeMillis();
-//        System.out.print(aa-ab);
-
     }
 }

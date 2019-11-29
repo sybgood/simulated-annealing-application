@@ -1,8 +1,6 @@
 package uk.ac.ed.inf.powergrab;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 /**
  * 
@@ -11,7 +9,7 @@ import java.util.HashMap;
  */
 public class Statefuldrone extends drone {
     private ArrayList<Position> target; 
-    private StringBuilder str = new StringBuilder(); // Trace recording.
+    private StringBuilder str = new StringBuilder(); // Record the detail of each move.
     private ArrayList<Position> CoorList; // List of position of charge station.
     /**
      * 
@@ -51,11 +49,18 @@ public class Statefuldrone extends drone {
      * The function stores the order in target.
      */
     private void getTargetPath() {
-        // Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
-        Annealing a = new Annealing(map,1000,300,200.0f,0.995f,rnd,curr);
-
+        //current best Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
+        //Annealing a = new Annealing(map,1000,300,200.0f,0.995f,rnd,curr);
+        //Annealing a = new Annealing(map,400,200,300.0f,0.97455f,rnd,curr);
+        Annealing a = new Annealing(map,1000,300,300.0f,0.99f,rnd,curr);
+        Annealing b = new Annealing(map,500,600,500.0f,0.9786f,rnd,curr);
         a.solve();
-        target = a.givePath();
+        b.solve();
+        b.heatAgain();
+        a.heatAgain();
+        System.out.println(b.bestEvaluation-a.bestEvaluation);
+        if (b.bestEvaluation>a.bestEvaluation) target = a.givePath();
+        else target = b.givePath();
         target.remove(0);
     }
     /**
@@ -96,7 +101,7 @@ public class Statefuldrone extends drone {
                         else target.remove(j);
                     }
                 }
-                /*If we charged all positive station, we just random select good direction to move*/
+                /*If we charged all positive station, we just random select suitable direction to move*/
                 if(target.size()==0) {
                     while(canMove()) {
                         randomMove();
@@ -105,8 +110,9 @@ public class Statefuldrone extends drone {
                 }
                 else  {
                     for(i=0;i<target.size();i++) {
-                        while(canMove()) {
+                        if(canMove()) {
                             this.unLimitedMoveTo(target.get(i));
+                            target.remove(i);
                         }
                     }
                 }
@@ -195,7 +201,9 @@ public class Statefuldrone extends drone {
                 break;
             }
             
-            if(branches.get(0).size()>30) return false;
+            if(branches.size()>5000) {
+                return false;
+            }
             Boolean delete = false;
             for(int i=1;i<branches.size();i++) {
                 ArrayList<Position> b = branches.get(i);
@@ -237,7 +245,15 @@ public class Statefuldrone extends drone {
                             branches.add(ttmp);
                         }
                         branches.remove(temp);
-                        Collections.sort(branches,new heurstic(p));
+                        branches.sort((p1,p2) -> {
+                            Double h0 = calDistance(p1.get(0),p);
+                            Double h1 = calDistance(p2.get(0),p);
+                            Double g0 = p1.size()*0.0003;
+                            Double g1 = p1.size()*0.0003;
+                            Double f0 = h0+g0;
+                            Double f1 = h1+g1;
+                            return (f0>=f1)? 1 : -1;
+                        });
                     }
                     else return false;
             }
@@ -310,18 +326,10 @@ public class Statefuldrone extends drone {
 //                    DStation = haveStation(pp);
 //                    System.out.println("oops");
                     DStation = haveStation(temp.get(0));
+                    Double leastLost = -10000.0;
+                    Direction k = Direction.N;
                     for(Direction d: Direction.values()) {
                         if(DStation.containsKey(d)) {
-                            if(map.PositionCoins.get(DStation.get(d))<0) {
-                                continue;
-                            }
-                        }
-                        directionSet.add(d);
-                    }
-                    if(directionSet.isEmpty()) {
-                        Double leastLost = -10000.0;
-                        Direction k = Direction.N;
-                        for (Direction d:DStation.keySet()) {
                             Position pk = p0.nextPosition(d);
                             if(pk.inPlayArea()) {
                                 if(map.PositionCoins.get(DStation.get(d))>leastLost) {
@@ -329,10 +337,14 @@ public class Statefuldrone extends drone {
                                     leastLost = map.PositionCoins.get(DStation.get(d));
                                 }
                             }
+                            if(map.PositionCoins.get(DStation.get(d))<0) {
+                                continue;
+                            }
                         }
-                        directionSet.add(k);
+                        directionSet.add(d);
                     }
-                        Position pk;
+                    if(!directionSet.contains(k))directionSet.add(k);
+                    Position pk;
                     for (Direction d:directionSet) {
                         ArrayList<Position> ttmp = new ArrayList<Position>(temp);
                         pk = p0.nextPosition(d);
@@ -342,7 +354,15 @@ public class Statefuldrone extends drone {
                         branches.add(ttmp);
                     }
                     branches.remove(temp);
-                    Collections.sort(branches,new heurstic(p));               
+                    branches.sort((p1,p2) -> {
+                        Double h0 = calDistance(p1.get(0),p);
+                        Double h1 = calDistance(p2.get(0),p);
+                        Double g0 = p1.size()*0.0003;
+                        Double g1 = p1.size()*0.0003;
+                        Double f0 = h0+g0;
+                        Double f1 = h1+g1;
+                        return (f0>=f1)? 1 : -1;
+                    });             
             }
         }
         if(!best.isEmpty()) {
@@ -366,41 +386,5 @@ public class Statefuldrone extends drone {
             return true;
         }
         else return false;   
-    }
-    
-    
-    /**
-     * Inner class, override of comparator.
-     * Act like heurstic function.
-     */
-    class heurstic implements Comparator<ArrayList<Position>>{
-        private Position TargetP;
-        /**
-         * 
-         * @param p Position
-         * Constructor, stores a position.
-         */
-        heurstic(Position p) {
-            TargetP = p;
-        }
-        /**
-         * @param b1 A series of position which is drone's predicated movement 
-         * @param b2
-         * f(n) = h(n)+g(n)
-         * Where h(n) is euclidean distance from target to current position
-         * g(n) is the cost from start to current.
-         * branch with lower f(n) score will be ordered in front.
-         */
-        @Override
-        public int compare(ArrayList<Position> b1, ArrayList<Position> b2) {
-            // TODO Auto-generated method stub
-            Double h0 = calDistance(b1.get(0),TargetP);
-            Double h1 = calDistance(b2.get(0),TargetP);
-            Double g0 = b1.size()*0.0003;
-            Double g1 = b2.size()*0.0003;
-            Double f0 = h0+g0;
-            Double f1 = h1+g1;
-            return (f0>=f1)? 1 : -1;
-        } 
     }
 }

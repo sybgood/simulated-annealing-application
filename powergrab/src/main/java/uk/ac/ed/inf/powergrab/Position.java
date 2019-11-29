@@ -14,6 +14,7 @@ public class Position {
         this.latitude  = latitude;
         this.longitude = longitude;
     }
+    /*Return a new position accordng to the direction*/
     protected Position nextPosition(Direction direction) {
         switch (direction) {
             case S:

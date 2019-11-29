@@ -26,6 +26,7 @@ public abstract class drone {
      */
     public drone(Double latitude,Double longitude,int seed,Map map) {
         curr = new Position(latitude,longitude);
+        if(!curr.inPlayArea()) throw new IllegalArgumentException ("Start position is not in play area!");
         this.map = map;
         rnd = new Random(seed);
     }
@@ -34,10 +35,6 @@ public abstract class drone {
      * @param direction
      * @return boolean value, indicates whether this move is success or not.
      * Move the drone to the given direction.
-     * Move may failed in 
-     * 1. the target position is invalid(not in play area)
-     * 2. Not enough power
-     * 3. Drone has already reach 250 steps.
      */
     protected Boolean move(Direction direction) {
         Position next = curr.nextPosition(direction);
@@ -54,7 +51,7 @@ public abstract class drone {
     }
     /**
      * 
-     *@return  a string which is the movement log for the drone.
+     *@return  a string which contains each move's detail for the drone.
      */
     protected abstract String play();
 
@@ -106,7 +103,7 @@ public abstract class drone {
                 map.PositionPower.put(p0,Station_power);
             }
             else {
-                if(coin>Station_coin) {
+                if(coin>-Station_coin) {
                     coin += Station_coin;
                     Station_coin = 0.0;
                 }
@@ -114,7 +111,7 @@ public abstract class drone {
                     coin=0.0;
                     Station_coin+=coin;
                 }
-                if(power>Station_power) {
+                if(power>-Station_power) {
                     power+=Station_power;
                     Station_power=0.0;
                 }
@@ -126,24 +123,24 @@ public abstract class drone {
                 map.PositionPower.put(p0,Station_power);
             }
         }
-        else System.out.print("This position is not a valid charge stations' position!");
+        else System.out.print("This position is not a valid charge station's position!");
     }
     /**
      * 
      * @param p Position current position
      * @return Hashmap with direction as a key, position is the charge station position.
-     * haveStation first travel 16 direction, find which direction may lead the drone to a charge stations' charge range.
-     * If direction D can let the drone charge from a charge station S, then we put (D,position of S) to the map. 
+     * haveStation first loop 16 direction, find which direction may lead the drone charge from a station.
+     * If move to direction D can let the drone charge from a charge station S, then we put (D,S.position) to the map. 
      * Otherwise we do nothing to the map.
      * 
      */
 
-    protected HashMap<Direction,Position> haveStation(Position p) { 
+    protected HashMap<Direction,Position> haveStation(Position p) {     
         HashMap<Direction,Position> k = new HashMap<Direction,Position>();
         int i;
         Position coor;
         Position nextp;
-        for (Direction d : Direction.values()) { // Travesal all the directions
+        for (Direction d : Direction.values()) { // Traversal all the directions
             i = 0;
             nextp = p.nextPosition(d);
             if(!nextp.inPlayArea()) continue;

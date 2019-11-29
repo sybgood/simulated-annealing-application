@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 /**
+ * Stateless drone, has naive strategy.
  * @author s1742667
  */
 public class Statelessdrone extends drone {
@@ -17,6 +18,7 @@ public class Statelessdrone extends drone {
     }
     /**
      * Tell the drone which way to go.
+     * @return direction that won't make drone lose coins.
      */
     protected Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range, 
         //then go towards that station, otherwise return a random direction.
@@ -57,8 +59,7 @@ public class Statelessdrone extends drone {
         Double prev_latitude;
         Double prev_longitude;
         map.addTrace(curr);
-        while(steps>0) {
-            if(power<=0) break;
+        while(canMove()) {
             Direction d = statelessSearch(); // Select a direction.
             prev_latitude =curr.latitude;
             prev_longitude = curr.longitude;
