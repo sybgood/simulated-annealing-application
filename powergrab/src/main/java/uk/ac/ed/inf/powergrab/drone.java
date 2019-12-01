@@ -53,7 +53,7 @@ public abstract class drone {
      * 
      *@return  a string which contains each move's detail for the drone.
      */
-    protected abstract String play();
+    public abstract String play();
 
     /**
      * 

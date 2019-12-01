@@ -17,7 +17,8 @@ public class Statefuldrone extends drone {
      * @param longitude
      * @param seed
      * @param map
-     * Constructor, do the same thing as its parent class. And it will also store the list of stations' position.
+     * Constructor, do the same thing as its parent class.
+     * And it will also store the list of stations' position.
      */
     protected Statefuldrone(Double latitude, Double longitude,int seed,Map map) {
         super(latitude, longitude, seed, map);
@@ -28,7 +29,7 @@ public class Statefuldrone extends drone {
     /**
      * 
      * @param p Position
-     * @return the closest station to the given position p.
+     * @return the station's position closest to the given position p.
      * 
      */
     private Position findClosest (Position p) {
@@ -65,17 +66,19 @@ public class Statefuldrone extends drone {
     }
     /**
      * Stateful drone's play function.
-     * When called, the drone will keep moving and charging until it can't move anymore.
+     * When called, the drone will keep moving and charging
+     * until it can't move anymore.
      */
     @Override
-    protected String play() {
+    public String play() {
         getTargetPath();
         Boolean b; 
         int i;
         map.addTrace(curr);
         int j=0;    
         int target_size = target.size();
-        /* Travelling all the position stored in target, if moving success, we remove that position in target list.*/
+        /* Travelling all the position stored in target, if moving success, 
+         * we remove that position in target list.*/
         for(i=0;i<target_size;i++) {
             b = moveTo(target.get(j));
             if(!b) {
@@ -101,7 +104,8 @@ public class Statefuldrone extends drone {
                         else target.remove(j);
                     }
                 }
-                /*If we charged all positive station, we just random select suitable direction to move*/
+                /*If we charged all positive station,
+                 *we just random select suitable direction to move*/
                 if(target.size()==0) {
                     while(canMove()) {
                         randomMove();
@@ -120,7 +124,7 @@ public class Statefuldrone extends drone {
         return str.toString(); 
     }
     /**
-     * Generate a direction that do not let the drone lose its power/coins and move the drone.
+     * Move the drone to a direction that won't let the drone lose its power/coins and move the drone.
      */
     protected void randomMove() {
         HashMap<Direction, Position> DStation = haveStation(curr);
@@ -130,8 +134,9 @@ public class Statefuldrone extends drone {
                 Double prev_longitude = curr.longitude;
                 boolean succ = super.move(d);
                 if(succ) {
-                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
-                    +","+coin+","+power+"\n");                      
+                    str.append(prev_latitude+","+prev_longitude+","+d+","
+                            +curr.latitude+","+curr.longitude+","
+                                +coin+","+power+"\n");                      
                     break;
                 }
             }
@@ -141,7 +146,7 @@ public class Statefuldrone extends drone {
      * 
      * @param p1 Position
      * @param p2 Position
-     * @return which direction p2 is in p1.
+     * @return in what direction is p2 with respect to p1.
      */
     protected static Direction targetDirection(Position p1,Position p2) {
         Double x = p2.longitude-p1.longitude;
@@ -155,7 +160,8 @@ public class Statefuldrone extends drone {
         if(degree>101.25 && degree<=123.75) return Direction.NNW;
         if(degree>123.75 && degree<=146.25)return Direction.NW;
         if(degree>146.25 && degree<=168.75)return Direction.WNW;
-        if((degree>168.75&& degree<=180)||(degree>=-180&&degree<=-168.75))return Direction.W;
+        if((degree>168.75&& degree<=180)||(degree>=-180&&degree<=-168.75))
+            return Direction.W;
         if(degree>-168.75&& degree<=-146.25) return Direction.WSW;
         if(degree>-146.25&& degree<=-123.75)return Direction.SW;
         if(degree>-123.75&& degree<=-101.25) return Direction.SSW;
@@ -176,7 +182,8 @@ public class Statefuldrone extends drone {
         Double d1 = p1.latitude;
         Double d2 = p1.longitude;
         for(Position p2:ap) {
-            if( Double.compare(d1, p2.latitude) == 0 && Double.compare(d2, p2.longitude) == 0)
+            if( Double.compare(d1, p2.latitude) == 0 
+                    && Double.compare(d2, p2.longitude) == 0)
                 return true;
         }
         return false;
@@ -272,7 +279,8 @@ public class Statefuldrone extends drone {
                 if(super.canMove()) {
                     super.move(d);
                     if(isNear(curr,charge_station)) super.meetChargeStation(charge_station);
-                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                    str.append(prev_latitude+","+prev_longitude+","+d
+                            +","+curr.latitude+","+curr.longitude
                             +","+coin+","+power+"\n");
                 }
             }
@@ -284,8 +292,9 @@ public class Statefuldrone extends drone {
      * 
      * @param p
      * @return
-     * Another moveTo method, the difference between this and MoveTo is that the unLimitedMoveTo
-     * has no limitations, i.e Branches.size<30; And also it will consider pass through the
+     * Another moveTo method, the difference between unLimitedMoveTo
+     * and MoveTo is that the unLimitedMoveTo has no limitations. 
+     * And also it will consider pass through the
      * negative charge station.
      * It is designed for the situation that drone is surrounded by negative stations.
      */

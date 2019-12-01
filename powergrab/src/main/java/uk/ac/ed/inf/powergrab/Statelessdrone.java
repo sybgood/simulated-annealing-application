@@ -53,7 +53,7 @@ public class Statelessdrone extends drone {
      * 
      */
     @Override
-    protected String play() {
+    public String play() {
         StringBuilder s = new StringBuilder(); 
         Boolean isSuccess; 
         Double prev_latitude;

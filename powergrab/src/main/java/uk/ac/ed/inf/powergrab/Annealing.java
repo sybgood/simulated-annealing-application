@@ -4,26 +4,23 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Annealing {
-    private int N;// iteration times for each temperature.
-    private int Tem_t;// annealing iteration times. 
-    private float a;// annealing cooling factor. Current temperature t1 = a * t0
-    private float t0;// initial temperature
-    private Double[][] distance; /* A 2D array,shows the distance between two positions. i.e Double[i][j] is the distance between
-                                    the ith station and jth station.*/
-    private int NumS; // Number of nodes, should be # Positive station + 1 (start point)
-    
-    private int[] path; // The drone will travel from coorList.get(path[0]) to coorList.get(path[max_length-1])
-    private Double pathEvaluation; // Total distance the drone need to move, evaluated from path. 
-    private int[] bestPath; /* Path with lowest distance travel during current iteration will be considered
-                               as bestPath.*/
-    private Double bestEvaluation; // Total distance the drone need to move, evaluated from bestpath. 
-    private int[] tempPath; // temporal path.
-    private Double tempEvaluation; //Total distance from the drone need to move, evaluated from temppath.
-    private Random rnd; // random seed.
-    private ArrayList<Position> coorList; // List of position of charge station with positive coins.
+    private final int N;
+    private final int Tem_n;
+    private final float a;
+    private final float t0;
+    private Double[][] distance; 
+    private int NumS; 
+    private int[] path; 
+    private Double pathEvaluation; 
+    private int[] bestPath; 
+    protected Double bestEvaluation; 
+    private int[] tempPath;
+    private Double tempEvaluation; 
+    private Random rnd; 
+    private ArrayList<Position> coorList; 
     protected Annealing(Map map,int n, int t, float t0, float aa,Random rnd,Position startPoint) {
         this.N = n;
-        this.Tem_t = t;
+        this.Tem_n = t;
         this.t0 = t0;
         this.a = aa;
         this.rnd = rnd;
@@ -39,7 +36,9 @@ public class Annealing {
         tempPath = new int[NumS];
         tempEvaluation = Double.MAX_VALUE;
         //bestT = 0;
+        initPath();
     }
+    
     /**
      * Initialise the path.
      */
@@ -54,10 +53,10 @@ public class Annealing {
         }
     }
     /**
-     * 
-     * @param path1
-     * @param path2
+     *      
      * Copy the path from path1 to path2.
+     * @param path1 int[]
+     * @param path2 int[]
      */
     private void copyPath(int[] path1,int[] path2) {
         int i;
@@ -113,7 +112,6 @@ public class Annealing {
      * Find the best path.
      */
     protected void solve() {
-        initPath();
         copyPath(path,bestPath);
         bestEvaluation = evaluate(path);
         pathEvaluation = bestEvaluation;
@@ -121,7 +119,7 @@ public class Annealing {
         int n;
         float t = t0;
         Double r= 0.0;
-        while(k<Tem_t) {
+        while(k<Tem_n) {
             n=0;
             while(n<N) {
                 newPath(path,tempPath);
@@ -143,8 +141,8 @@ public class Annealing {
 
     }
     /**
-     * @param coorList
-     * @param map
+     * @param coorList List of station's position
+     * @param map 
      * @return the list of position of charge stations which contains positive coins and powers.
      */
     private ArrayList<Position> onlyPositive (ArrayList<Position> coorList,Map map){
@@ -179,5 +177,11 @@ public class Annealing {
             }
         }
         distance[NumS-1][NumS-1] = 0.0;
+    }
+    protected void heatAgain() {
+        this.copyPath(bestPath,path);
+        int k = rnd.nextInt();
+        rnd = new Random(k);
+        this.solve();
     }
 }
