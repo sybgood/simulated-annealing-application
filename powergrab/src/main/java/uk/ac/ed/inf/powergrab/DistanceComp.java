@@ -2,11 +2,11 @@ package uk.ac.ed.inf.powergrab;
 
 import java.util.Comparator;
 /**
- * 
+ * Override comparator class, sort the input list in the ascending order that compare the distance to given position p. 
  * @author s1742667
  *
  */
-public class DistanceComp implements Comparator <Position> {
+class DistanceComp implements Comparator <Position> {
     private Position TargetP;
     /**
      * 

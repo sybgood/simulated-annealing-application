@@ -7,32 +7,30 @@ import java.util.List;
  * Stateless drone, has naive strategy.
  * @author s1742667
  */
-public class Statelessdrone extends drone {
+class Statelessdrone extends drone {
     protected Position nearStation = new Position(0,0);  // Position for the station then the drone will charge.
     /**
      * Constructor, do the same thing as its parent class.
      */
     protected Statelessdrone(Double latitude, Double longitude,int seed, Map map) {
         super(latitude, longitude, seed, map);
-        // TODO Auto-generated constructor stub
-    }
+        }
     /**
      * Tell the drone which way to go.
      * @return direction that won't make drone lose coins.
      */
-    protected Direction statelessSearch() { //If there exist a charge Station within 0.0003 degree range, 
-        //then go towards that station, otherwise return a random direction.
+    protected Direction statelessSearch() {
         HashMap<Direction,Position> h = haveStation(curr);
         Direction[] directionSet = Direction.values();
         List<Direction>Directionlist = new ArrayList<Direction>(Arrays.asList(directionSet));
         if(!h.isEmpty()) {   
             for (Direction d:h.keySet()) {
                 Position chargeStation = h.get(d);
-                if(map.PositionPower.get(chargeStation)>0) {
+                if(map.getPositionPower().get(chargeStation)>0) {
                     nearStation = chargeStation;
                     return d;
                 }
-                if(map.PositionPower.get(chargeStation)<0) {
+                if(map.getPositionPower().get(chargeStation)<0) {
                     Directionlist.remove(d);
                 }
             }
@@ -48,9 +46,7 @@ public class Statelessdrone extends drone {
     }
 
     /**
-     * 
      * Stateless drone's play function. When call, the stateless drone will keep moving until it run out of power/steps.
-     * 
      */
     @Override
     public String play() {
@@ -60,18 +56,18 @@ public class Statelessdrone extends drone {
         Double prev_longitude;
         map.addTrace(curr);
         while(canMove()) {
-            Direction d = statelessSearch(); // Select a direction.
-            prev_latitude =curr.latitude;
-            prev_longitude = curr.longitude;
+            Direction d = statelessSearch(); 
+            prev_latitude =curr.getLatitude();
+            prev_longitude = curr.getLongitude();
             
             isSuccess = super.move(d); 
             if(nearStation.inPlayArea()) 
             {
                 super.meetChargeStation(nearStation); 
-                nearStation.latitude = 0; 
+                nearStation.setLatitude(0); 
             }
             if(isSuccess) { 
-                s.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                s.append(prev_latitude+","+prev_longitude+","+d+","+curr.getLatitude()+","+curr.getLongitude()
                         +","+coin+","+power+"\n");
             }          
         }

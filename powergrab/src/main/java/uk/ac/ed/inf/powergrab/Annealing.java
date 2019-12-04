@@ -3,7 +3,7 @@ package uk.ac.ed.inf.powergrab;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Annealing {
+class Annealing {
     private final int N;
     private final int Tem_n;
     private final float a;
@@ -25,8 +25,8 @@ public class Annealing {
         this.a = aa;
         this.rnd = rnd;
         coorList = map.getCoorList();
-        coorList = onlyPositive(coorList,map); // Find all stations with positive coins and record its position. 
-        NumS = coorList.size()+1; // +1 for start position.
+        coorList = onlyPositive(coorList,map); 
+        NumS = coorList.size()+1;
         coorList.add(0,startPoint);
         calculateStationDistance(coorList);
         path = new int[NumS];
@@ -35,7 +35,6 @@ public class Annealing {
         bestEvaluation = Double.MAX_VALUE;
         tempPath = new int[NumS];
         tempEvaluation = Double.MAX_VALUE;
-        //bestT = 0;
         initPath();
     }
     
@@ -75,7 +74,6 @@ public class Annealing {
         for(i=1;i<NumS;i++) {
             len+=distance[path[i-1]][path[i]];
         }
-        //len += distance[path[NumS - 1]][path[0]];
         return len;
     }
     /**
@@ -83,18 +81,41 @@ public class Annealing {
      * @param tempPath
      * First copy current path to tempPath, then random switch two nodes in tempPath.
      */
-    private void newPath(int[] path, int[] tempPath) {
+    private void newPath() {
         int temp,ran1,ran2;
         copyPath(path,tempPath);
+        Float f1 = rnd.nextFloat();
         ran1 = 0;
         ran2 = 0;
         while (ran1==0||ran1 == ran2||ran2==0) {
             ran1 = rnd.nextInt(NumS);
             ran2 = rnd.nextInt(NumS);
         }
-        temp = tempPath[ran1];
-        tempPath[ran1] = tempPath[ran2];
-        tempPath[ran2] = temp;
+        
+        if (f1<0.2f){
+            if(ran1>ran2) {
+              temp = ran1;
+              ran1 = ran2;
+              ran2 = temp;
+            }
+            if(ran1==ran2-1) {
+                temp = tempPath[ran1];
+                tempPath[ran1] = tempPath[ran2];
+                tempPath[ran2] = temp;
+                return;
+            }        
+            temp = tempPath[ran1+1];
+            tempPath[ran1+1] = tempPath[ran2];
+            for(int i = ran2; i>ran1+1 ; i-- ) {
+                tempPath[i] = tempPath[i-1];
+            }
+            tempPath[ran1+2] = temp;
+        }
+        else {
+            temp = tempPath[ran1];
+            tempPath[ran1] = tempPath[ran2];
+            tempPath[ran2] = temp;
+        }
     }
     /**
      * @return the travelling sequence of the best path we got. 
@@ -122,7 +143,7 @@ public class Annealing {
         while(k<Tem_n) {
             n=0;
             while(n<N) {
-                newPath(path,tempPath);
+                newPath();
                 tempEvaluation = evaluate(tempPath);
                 if (tempEvaluation < bestEvaluation) {
                     copyPath(tempPath, bestPath);
@@ -149,7 +170,7 @@ public class Annealing {
         Double c;
         ArrayList<Position> cc = new ArrayList<Position>();
         for(Position p : coorList) {
-            c = map.PositionCoins.get(p);
+            c = map.getPositionCoins().get(p);
             if(c>=0) cc.add(p);
         }
         return cc;

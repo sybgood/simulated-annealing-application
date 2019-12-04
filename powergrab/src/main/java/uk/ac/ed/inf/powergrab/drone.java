@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
-public abstract class drone {
+abstract class drone {
     protected Double coin = 0.0; 
     protected Double power = 250.0; 
-    protected int steps = 250; // States how many steps the drone can move, start at 250.
-    protected Position curr; // Current position
-    protected Map map; // The map it store.
-    protected final Random rnd; // Randome seed.
+    protected int steps = 250;
+    protected Position curr;
+    protected Map map;  
+    protected final Random rnd; 
     
     /**
      * 
@@ -70,10 +70,10 @@ public abstract class drone {
      * @return Euclidean distance between p1 and p2.
      */
     protected static Double calDistance(Position p1, Position p2) {
-        Double x1 = p1.latitude;
-        Double x2 = p2.latitude;
-        Double y1 = p1.longitude;
-        Double y2 = p2.longitude;
+        Double x1 = p1.getLatitude();
+        Double x2 = p2.getLatitude();
+        Double y1 = p1.getLongitude();
+        Double y2 = p2.getLongitude();
         return (Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2)));
     }
     /**
@@ -92,18 +92,18 @@ public abstract class drone {
      */
     protected void meetChargeStation(Position p0) {
         if(map.getCoorList().contains(p0)) {
-            Double Station_power = map.PositionPower.get(p0);
-            Double Station_coin = map.PositionCoins.get(p0);
-            if(Station_power>=0) {
+            Double Station_power = map.getPositionPower().get(p0);
+            Double Station_coin = map.getPositionCoins().get(p0);
+            if(Station_power>=0&&Station_coin>=0) {
                 power += Station_power;
                 Station_power = 0.0;
                 coin += Station_coin;
                 Station_coin = 0.0;
-                map.PositionCoins.put(p0,Station_coin);
-                map.PositionPower.put(p0,Station_power);
+                map.getPositionCoins().put(p0,Station_coin);
+                map.getPositionPower().put(p0,Station_power);
             }
             else {
-                if(coin>-Station_coin) {
+                if(coin>Math.abs(Station_coin)) {
                     coin += Station_coin;
                     Station_coin = 0.0;
                 }
@@ -111,7 +111,7 @@ public abstract class drone {
                     coin=0.0;
                     Station_coin+=coin;
                 }
-                if(power>-Station_power) {
+                if(power>Math.abs(Station_power)) {
                     power+=Station_power;
                     Station_power=0.0;
                 }
@@ -119,8 +119,8 @@ public abstract class drone {
                     Station_power+=power;
                     power=0.0;
                 }
-                map.PositionCoins.put(p0,Station_coin);
-                map.PositionPower.put(p0,Station_power);
+                map.getPositionCoins().put(p0,Station_coin);
+                map.getPositionPower().put(p0,Station_power);
             }
         }
         else System.out.print("This position is not a valid charge station's position!");
@@ -140,12 +140,11 @@ public abstract class drone {
         int i;
         Position coor;
         Position nextp;
-        for (Direction d : Direction.values()) { // Traversal all the directions
+        for (Direction d : Direction.values()) { 
             i = 0;
             nextp = p.nextPosition(d);
             if(!nextp.inPlayArea()) continue;
             ArrayList<Position> CoorList = map.getCoorList();
-            // Sort the station consider the distance to the next position.
             Collections.sort(CoorList,new DistanceComp(nextp));
             while(true) {
                 coor = CoorList.get(i);

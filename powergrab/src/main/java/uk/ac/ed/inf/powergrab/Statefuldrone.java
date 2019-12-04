@@ -7,7 +7,7 @@ import java.util.HashMap;
  * @author s1742667
  *
  */
-public class Statefuldrone extends drone {
+class Statefuldrone extends drone {
     private ArrayList<Position> target; 
     private StringBuilder str = new StringBuilder(); // Record the detail of each move.
     private ArrayList<Position> CoorList; // List of position of charge station.
@@ -23,8 +23,6 @@ public class Statefuldrone extends drone {
     protected Statefuldrone(Double latitude, Double longitude,int seed,Map map) {
         super(latitude, longitude, seed, map);
         CoorList = map.getCoorList();
-
-        // TODO Auto-generated constructor stub
     }
     /**
      * 
@@ -50,20 +48,17 @@ public class Statefuldrone extends drone {
      * The function stores the order in target.
      */
     private void getTargetPath() {
-        //current best Annealing a = new Annealing(map,2000,400,200.0f,0.995f,rnd,curr);
-        //Annealing a = new Annealing(map,1000,300,200.0f,0.995f,rnd,curr);
-        //Annealing a = new Annealing(map,400,200,300.0f,0.97455f,rnd,curr);
-        Annealing a = new Annealing(map,1000,300,300.0f,0.99f,rnd,curr);
-        Annealing b = new Annealing(map,500,600,500.0f,0.9786f,rnd,curr);
+        Annealing a = new Annealing(map,1000,300,300.0f,0.986f,rnd,curr);
+        Annealing b = new Annealing(map,500,600,2160.0f,0.97973f,rnd,curr);
         a.solve();
         b.solve();
         b.heatAgain();
         a.heatAgain();
-        System.out.println(b.bestEvaluation-a.bestEvaluation);
         if (b.bestEvaluation>a.bestEvaluation) target = a.givePath();
         else target = b.givePath();
         target.remove(0);
     }
+    
     /**
      * Stateful drone's play function.
      * When called, the drone will keep moving and charging
@@ -89,8 +84,7 @@ public class Statefuldrone extends drone {
                 target.remove(j);
             }
         }
-        /*The drone has already tried travelling all the targets*/
-            System.out.println(250-steps);
+ //           System.out.println("Steps need to finish charging:"+(250-steps));
             While0:
             while(canMove()) {
                 if(!target.isEmpty()) {
@@ -113,12 +107,10 @@ public class Statefuldrone extends drone {
                     return str.toString();
                 }
                 else  {
-                    for(i=0;i<target.size();i++) {
                         if(canMove()) {
-                            this.unLimitedMoveTo(target.get(i));
-                            target.remove(i);
+                            boolean bb = this.unLimitedMoveTo(target.get(0));
+                            if(bb)target.remove(0);
                         }
-                    }
                 }
             }
         return str.toString(); 
@@ -129,13 +121,13 @@ public class Statefuldrone extends drone {
     protected void randomMove() {
         HashMap<Direction, Position> DStation = haveStation(curr);
         for(Direction d : Direction.values()) {
-            if (!DStation.containsKey(d)||map.PositionCoins.get(DStation.get(d))>=0) {
-                Double prev_latitude =curr.latitude;
-                Double prev_longitude = curr.longitude;
+            if (!DStation.containsKey(d)||map.getPositionCoins().get(DStation.get(d))>=0) {
+                Double prev_latitude =curr.getLatitude();
+                Double prev_longitude = curr.getLongitude();
                 boolean succ = super.move(d);
                 if(succ) {
                     str.append(prev_latitude+","+prev_longitude+","+d+","
-                            +curr.latitude+","+curr.longitude+","
+                            +curr.getLatitude()+","+curr.getLongitude()+","
                                 +coin+","+power+"\n");                      
                     break;
                 }
@@ -149,8 +141,8 @@ public class Statefuldrone extends drone {
      * @return in what direction is p2 with respect to p1.
      */
     protected static Direction targetDirection(Position p1,Position p2) {
-        Double x = p2.longitude-p1.longitude;
-        Double y = p2.latitude-p1.latitude;
+        Double x = p2.getLongitude()-p1.getLongitude();
+        Double y = p2.getLatitude()-p1.getLatitude();
         Double degree = Math.atan2(y,x)*180/Math.PI;
         if(degree>-11.25 && degree<=11.25)return Direction.E;
         if(degree>11.25  && degree<=33.75) return Direction.ENE;
@@ -171,7 +163,6 @@ public class Statefuldrone extends drone {
         if(degree>-33.75 && degree<=-11.25) return Direction.ESE;
         return null;
     }
-    // Return a hashmap that map from direction to station ID. And the set of direction is the the input direciton itself and 6 nearby direction.
     /**
      * 
      * @param p1 Position
@@ -179,11 +170,11 @@ public class Statefuldrone extends drone {
      * @return Whether p1 is inside ap.
      */
     private boolean isInside(Position p1,ArrayList<Position> ap) {
-        Double d1 = p1.latitude;
-        Double d2 = p1.longitude;
+        Double d1 = p1.getLatitude();
+        Double d2 = p1.getLongitude();
         for(Position p2:ap) {
-            if( Double.compare(d1, p2.latitude) == 0 
-                    && Double.compare(d2, p2.longitude) == 0)
+            if( Double.compare(d1, p2.getLatitude()) == 0 
+                    && Double.compare(d2, p2.getLongitude()) == 0)
                 return true;
         }
         return false;
@@ -203,7 +194,7 @@ public class Statefuldrone extends drone {
         while(!branches.isEmpty()){
             Position p0 = branches.get(0).get(0);
             Position charge_station = findClosest(p0);
-            if(branches.get(0).size()>1&&isNear(p,p0)&&charge_station.equals(p)) {
+            if(branches.get(0).size()>1 && isNear(p,p0) && charge_station.equals(p)) {
                 best = branches.get(0);
                 break;
             }
@@ -229,13 +220,10 @@ public class Statefuldrone extends drone {
                 ArrayList<Position> temp;
                     temp = branches.get(0);
                     ArrayList<Direction> directionSet = new ArrayList<Direction>();
-//                    Position pp = new Position(55.9437410500966,-3.1873695165273106);
-//                    DStation = haveStation(pp);
-//                    System.out.println("oops");
                     DStation = haveStation(temp.get(0));
                     for(Direction d: Direction.values()) {
                         if(DStation.containsKey(d)) {
-                            if(map.PositionCoins.get(DStation.get(d))<0) {
+                            if(map.getPositionCoins().get(DStation.get(d))<0) {
                                 continue;
                             }
                         }
@@ -256,7 +244,7 @@ public class Statefuldrone extends drone {
                             Double h0 = calDistance(p1.get(0),p);
                             Double h1 = calDistance(p2.get(0),p);
                             Double g0 = p1.size()*0.0003;
-                            Double g1 = p1.size()*0.0003;
+                            Double g1 = p2.size()*0.0003;
                             Double f0 = h0+g0;
                             Double f1 = h1+g1;
                             return (f0>=f1)? 1 : -1;
@@ -271,8 +259,8 @@ public class Statefuldrone extends drone {
             Double prev_latitude;
             Double prev_longitude;
             for(i=best.size()-2;i>=0;i--) {
-                prev_latitude =curr.latitude;
-                prev_longitude = curr.longitude;
+                prev_latitude =curr.getLatitude();
+                prev_longitude = curr.getLongitude();
                 p0 = best.get(i);
                 Direction d = targetDirection(curr,p0);
                 Position charge_station = findClosest(p0);
@@ -280,7 +268,7 @@ public class Statefuldrone extends drone {
                     super.move(d);
                     if(isNear(curr,charge_station)) super.meetChargeStation(charge_station);
                     str.append(prev_latitude+","+prev_longitude+","+d
-                            +","+curr.latitude+","+curr.longitude
+                            +","+curr.getLatitude()+","+curr.getLongitude()
                             +","+coin+","+power+"\n");
                 }
             }
@@ -305,6 +293,7 @@ public class Statefuldrone extends drone {
         ArrayList<Position> explored = new ArrayList<Position>();
         start.add(curr);
         branches.add(start);
+        int count = 0;
         while(!branches.isEmpty()){
             Position p0 = branches.get(0).get(0);
             Position charge_station = findClosest(p0);
@@ -323,6 +312,7 @@ public class Statefuldrone extends drone {
             }
             if(isInside(p0,explored)||delete) {
                 branches.remove(0);
+                count = 0;
                 continue;
             }
             else {
@@ -331,9 +321,6 @@ public class Statefuldrone extends drone {
                 ArrayList<Position> temp;
                     temp = branches.get(0);
                     ArrayList<Direction> directionSet = new ArrayList<Direction>();
-//                    Position pp = new Position(55.9437410500966,-3.1873695165273106);
-//                    DStation = haveStation(pp);
-//                    System.out.println("oops");
                     DStation = haveStation(temp.get(0));
                     Double leastLost = -10000.0;
                     Direction k = Direction.N;
@@ -341,18 +328,22 @@ public class Statefuldrone extends drone {
                         if(DStation.containsKey(d)) {
                             Position pk = p0.nextPosition(d);
                             if(pk.inPlayArea()) {
-                                if(map.PositionCoins.get(DStation.get(d))>leastLost) {
+                                Double current_coin = map.getPositionCoins().get(DStation.get(d));
+                                if(current_coin>leastLost&&current_coin<0) {
                                     k = d;
-                                    leastLost = map.PositionCoins.get(DStation.get(d));
+                                    leastLost = current_coin;
                                 }
                             }
-                            if(map.PositionCoins.get(DStation.get(d))<0) {
+                            if(map.getPositionCoins().get(DStation.get(d))<0) {
                                 continue;
                             }
                         }
                         directionSet.add(d);
                     }
-                    if(!directionSet.contains(k))directionSet.add(k);
+                    if(!directionSet.contains(k)&&count==0) {
+                        directionSet.add(k);
+                        count++;
+                    }
                     Position pk;
                     for (Direction d:directionSet) {
                         ArrayList<Position> ttmp = new ArrayList<Position>(temp);
@@ -367,7 +358,7 @@ public class Statefuldrone extends drone {
                         Double h0 = calDistance(p1.get(0),p);
                         Double h1 = calDistance(p2.get(0),p);
                         Double g0 = p1.size()*0.0003;
-                        Double g1 = p1.size()*0.0003;
+                        Double g1 = p2.size()*0.0003;
                         Double f0 = h0+g0;
                         Double f1 = h1+g1;
                         return (f0>=f1)? 1 : -1;
@@ -380,15 +371,15 @@ public class Statefuldrone extends drone {
             Double prev_latitude;
             Double prev_longitude;
             for(i=best.size()-2;i>=0;i--) {
-                prev_latitude =curr.latitude;
-                prev_longitude = curr.longitude;
+                prev_latitude =curr.getLatitude();
+                prev_longitude = curr.getLongitude();
                 p0 = best.get(i);
                 Direction d = targetDirection(curr,p0);
                 Position charge_station = findClosest(p0);
                 if(super.canMove()) {
                     super.move(d);
                     if(isNear(curr,charge_station)) super.meetChargeStation(charge_station);
-                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.latitude+","+curr.longitude
+                    str.append(prev_latitude+","+prev_longitude+","+d+","+curr.getLatitude()+","+curr.getLongitude()
                             +","+coin+","+power+"\n");
                 }
             }

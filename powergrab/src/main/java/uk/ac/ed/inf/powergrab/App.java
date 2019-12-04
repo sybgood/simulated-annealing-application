@@ -54,7 +54,6 @@ public class App
                 buff.flush();
                 buff.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
     }
@@ -76,31 +75,12 @@ public class App
             String difficulty = args[6];        
             Map map = new Map(year,month,day);
             String date = day+"-"+month+"-"+year; 
-            long aa = System.currentTimeMillis();
             play(latitude,longitude,RNGseed,map,difficulty,date);
-            long ab =System.currentTimeMillis(); 
-            System.out.print(ab-aa);
         }
         catch(NumberFormatException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("input type of latitude or longitude or seed is illegal!");
         }
-//        for (int i = 1;i<=12;i++) {
-//            String day0;
-//            if(i<10) {
-//            day0 = "0"+i;
-//            }
-//            else day0 = ""+i;
-//            Map map0 = new Map(year,day0,day0);
-//            date = day0+"-"+day0+"-"+year; 
-//            long ab =System.currentTimeMillis(); 
-//            play(latitude,longitude,RNGseed,map0,"stateful",date);
-//            long aa = System.currentTimeMillis();
-//            System.out.println(aa-ab);
-//            Map map1 = new Map(year,day0,day0);
-//            play(latitude,longitude,RNGseed,map1,"stateless",date);
-//            long ac = System.currentTimeMillis();
-//            System.out.println(ac-ab);
-//        }
+
     }
 }
